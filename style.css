@@ -233,11 +233,19 @@ body {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     animation: buttonAppear 0.6s ease-out 0.35s both;
+    position: relative;
+    z-index: 10;
 }
 
 .btn-no:hover {
     transform: scale(1.08) translateY(-3px);
     box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-no.escaping {
+    position: fixed;
+    z-index: 1000;
+    animation: none !important;
 }
 
 @keyframes buttonAppear {

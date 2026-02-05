@@ -408,6 +408,9 @@ function buyGiftPart(giftId, cost) {
         insufficient.textContent = '❌ Недостаточно баллов!';
         document.querySelector(`[data-gift-id="${giftId}"]`).parentElement.appendChild(insufficient);
         setTimeout(() => insufficient.remove(), 2000);
+        
+        // Показываем кнопку "Переиграть" если не все подарки куплены
+        document.getElementById('playAgainMarket').style.display = 'inline-block';
     }
 }
 
@@ -465,15 +468,16 @@ function handleYes() {
 }
 
 function playAgain() {
-    // Скрываем финальный экран
-    document.getElementById('finalQuestion').style.display = 'none';
-    document.getElementById('finalButtons').style.display = 'none';
+    // Скрываем маркет
+    document.getElementById('marketContainer').style.display = 'none';
+    document.getElementById('playAgainMarket').style.display = 'none';
     
     // Очищаем купленные подарки для новой игры
     purchasedGifts.clear();
     
-    // Показываем главный контент и запускаем игры заново
-    document.getElementById('mainContent').style.display = 'block';
+    // Показываем игры заново
+    document.getElementById('game1').style.display = 'block';
+    startGame1();
     
     // Сбрасываем счётчик кликов и интервал для кнопки "Нет"
     clickCount = 0;
@@ -544,40 +548,14 @@ function handleNo() {
     
     clickCount++;
     
-    // Показываем сообщение переубеждения
-    if (responseDiv) {
-        const messageIndex = Math.min(clickCount - 1, persuasionMessages.length - 1);
-        responseDiv.textContent = persuasionMessages[messageIndex];
-        responseDiv.style.animation = 'none';
-        setTimeout(() => {
-            responseDiv.style.animation = 'responseShow 0.5s ease-out';
-        }, 10);
-    }
-    
-    // Если это первый клик - запускаем непрерывное движение
-    if (!isMoving) {
-        isMoving = true;
-        noBtn.style.transition = 'none'; // Без плавности для резкого движения
-        
-        // Кнопка движется каждые 150ms
-        moveInterval = setInterval(() => {
-            moveButtonRandomly();
-        }, 150);
-        
-        // Даём кнопке максимальный размер при первом нажатии
-        noBtn.style.transform = 'scale(0.7)';
-    }
-    
-    // Увеличиваем кнопку "Да"
-    const newScale = 1 + clickCount * 0.2;
-    yesBtn.style.transform = `scale(${newScale})`;
-    yesBtn.style.boxShadow = `0 10px ${30 + clickCount * 5}px rgba(255, 20, 147, ${0.4 + clickCount * 0.1})`;
-    
-    // После 5 попыток кнопка "Нет" исчезает полностью
-    if (clickCount >= 5) {
-        noBtn.style.opacity = '0';
-        noBtn.style.pointerEvents = 'none';
-        responseDiv.innerHTML = '❌ Кнопка "Нет" убежала! Остаётся только "Да"! 💕';
+    // Первое нажатие - показываем сообщение
+    if (clickCount === 1) {
+        responseDiv.innerHTML = persuasionMessages[0];
+        noBtn.classList.add('escaping');
+        // Запускаем движение кнопки
+        moveInterval = setInterval(moveButtonRandomly, 150);
+    } else if (clickCount < persuasionMessages.length) {
+        responseDiv.innerHTML = persuasionMessages[clickCount - 1];
     }
 }
 

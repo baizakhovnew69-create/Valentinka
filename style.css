@@ -176,16 +176,16 @@ body {
 
 .button-container {
     display: flex;
-    gap: 30px;
+    gap: 15px;
     justify-content: center;
     margin-bottom: 40px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     position: relative;
 }
 
 .btn {
-    padding: 16px 40px;
-    font-size: 1.1rem;
+    padding: 12px 25px;
+    font-size: 0.95rem;
     border: none;
     border-radius: 50px;
     cursor: pointer;

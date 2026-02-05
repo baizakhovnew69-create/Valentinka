@@ -427,6 +427,11 @@ function showFinalGift() {
     }, 3000);
 }
 
+function proceedFromMarket() {
+    document.getElementById('marketContainer').style.display = 'none';
+    document.getElementById('finalQuestion').style.display = 'block';
+}
+
 // Обработка кнопки "Да"
 function handleYes() {
     // Останавливаем движение кнопки "Нет"
@@ -451,6 +456,41 @@ function handleYes() {
     createConfetti();
     score += 50;
     updateScore();
+    
+    // Показываем кнопку "Сыграть ещё раз" после 3 сек
+    setTimeout(() => {
+        document.getElementById('finalButtons').style.display = 'block';
+        document.getElementById('finalScore').textContent = score;
+    }, 3000);
+}
+
+function playAgain() {
+    // Скрываем финальный экран
+    document.getElementById('finalQuestion').style.display = 'none';
+    document.getElementById('finalButtons').style.display = 'none';
+    
+    // Очищаем купленные подарки для новой игры
+    purchasedGifts.clear();
+    
+    // Показываем главный контент и запускаем игры заново
+    document.getElementById('mainContent').style.display = 'block';
+    
+    // Сбрасываем счётчик кликов и интервал для кнопки "Нет"
+    clickCount = 0;
+    isMoving = false;
+    if (moveInterval) {
+        clearInterval(moveInterval);
+        moveInterval = null;
+    }
+    
+    // Обнуляем состояние игр
+    gameStates = {
+        game1Completed: false,
+        game2Completed: false,
+        game3Completed: false,
+        game4Completed: false,
+        game5Completed: false
+    };
 }
 
 // Обработка кнопки "Нет"

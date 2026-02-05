@@ -142,6 +142,8 @@
                     <button class="btn-market" onclick="buyGiftPart(4, 100)">Купить</button>
                 </div>
             </div>
+
+            <button class="btn-next-market" onclick="proceedFromMarket()">Перейти дальше ➜</button>
         </div>
 
         <div class="final-question" id="finalQuestion" style="display:none;">
@@ -153,6 +155,11 @@
             </div>
 
             <div id="response" class="response"></div>
+            
+            <div id="finalButtons" style="display:none; margin-top: 30px; text-align: center;">
+                <button class="btn btn-primary" onclick="playAgain()" style="background: linear-gradient(135deg, #4CAF50, #45a049);">Сыграть ещё раз 🎮</button>
+                <p style="color: white; margin-top: 15px; font-size: 1.1rem;">Баллы сохранены: <span id="finalScore" style="font-weight: bold; color: #ffeb3b;">0</span> 🌟</p>
+            </div>
         </div>
     </div>
 

@@ -2616,3 +2616,10 @@ body::after {
         font-size: 0.65rem;
     }
 }
+
+body.hide-all-buttons button {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: scale(0.85) !important;
+}

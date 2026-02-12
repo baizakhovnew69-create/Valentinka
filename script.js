@@ -1,6 +1,6 @@
 ﻿let score = 0;
 let purchasedPuzzlePieces = new Set();
-const puzzleImageUrl = 'photo1.png';
+const puzzleImageUrl = 'photo2.jpg';
 const puzzleRows = 2;
 const puzzleCols = 4;
 const puzzleCellCount = puzzleRows * puzzleCols;
@@ -948,6 +948,7 @@ function handleYes() {
     yesBtn.disabled = true;
     noBtn.disabled = true;
     response.textContent = 'Ура! Спасибо за победу в испытании 💖';
+    document.body.classList.add('hide-all-buttons');
     reward(100, 'Финал');
     createConfetti();
 }
@@ -980,6 +981,8 @@ function resetFinalButtons() {
     if (response) {
         response.textContent = '';
     }
+
+    document.body.classList.remove('hide-all-buttons');
 }
 
 // ===== Effects =====

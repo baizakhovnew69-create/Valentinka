@@ -3,8 +3,8 @@ let purchasedPuzzlePieces = new Set();
 const puzzleImageUrl = 'photo1.png';
 const puzzleRows = 2;
 const puzzleCols = 4;
+const puzzleCellCount = puzzleRows * puzzleCols;
 const puzzlePieceCosts = [100, 120, 145, 160, 180, 220, 250, 300];
-const puzzleEdges = buildPuzzleEdges(puzzleRows, puzzleCols);
 
 const gameState = {
     game1: {},
@@ -766,57 +766,43 @@ function startGame8() {
 function showMarket() {
     hideAllScreens();
     document.getElementById('marketContainer').style.display = 'block';
+    const oldMessage = document.querySelector('#marketContainer .gift-message');
+    if (oldMessage) oldMessage.remove();
     renderPuzzlePreview();
-    renderPuzzleMarketItems();
     updateMarketDisplay();
 }
 
 function renderPuzzlePreview() {
     const preview = document.getElementById('puzzlePreview');
+    if (!preview) return;
+    preview.classList.remove('puzzle-preview-complete');
     preview.innerHTML = '';
 
-    for (let i = 0; i < puzzlePieceCosts.length; i++) {
-        const row = Math.floor(i / puzzleCols);
-        const col = i % puzzleCols;
-        const piece = document.createElement('div');
-        piece.className = 'puzzle-piece';
+    for (let i = 0; i < puzzleCellCount; i++) {
+        const piece = document.createElement('button');
+        piece.type = 'button';
+        piece.className = 'puzzle-piece puzzle-piece-locked';
         piece.dataset.pieceId = String(i);
-        piece.textContent = String(i + 1);
-        applyPuzzleShape(piece, row, col);
+        piece.innerHTML = `
+            <span class="puzzle-piece-number">${i + 1}</span>
+            <span class="puzzle-piece-cost">${puzzlePieceCosts[i] || 0} баллов</span>
+        `;
+        piece.onclick = () => openPuzzlePart(i);
         preview.appendChild(piece);
     }
 }
 
-function renderPuzzleMarketItems() {
-    const market = document.getElementById('marketItems');
-    market.innerHTML = '';
-
-    puzzlePieceCosts.forEach((cost, i) => {
-        const item = document.createElement('div');
-        item.className = 'market-item';
-        item.dataset.pieceId = String(i);
-        item.innerHTML = `
-            <span class="item-name">Часть ${i + 1}</span>
-            <span class="item-cost">${cost} баллов</span>
-            <button class="btn-market" onclick="buyPuzzlePart(${i})">Купить</button>
-        `;
-        market.appendChild(item);
-    });
-}
-
-function buyPuzzlePart(pieceId) {
+function openPuzzlePart(pieceId) {
     if (purchasedPuzzlePieces.has(pieceId)) return;
 
-    const cost = puzzlePieceCosts[pieceId];
+    const cost = puzzlePieceCosts[pieceId] || 0;
+    const piece = document.querySelector(`.puzzle-piece[data-piece-id="${pieceId}"]`);
     if (score < cost) {
-        const item = document.querySelector(`.market-item[data-piece-id="${pieceId}"]`);
-        if (item) {
-            const warn = document.createElement('div');
-            warn.className = 'insufficient-funds';
-            warn.textContent = 'Недостаточно баллов';
-            item.appendChild(warn);
-            setTimeout(() => warn.remove(), 1500);
+        if (piece) {
+            piece.classList.add('puzzle-piece-denied');
+            setTimeout(() => piece.classList.remove('puzzle-piece-denied'), 420);
         }
+        showPopup(`Нужно ${cost} баллов для этой ячейки`, 'warn', 1400);
         document.getElementById('playAgainMarket').style.display = 'inline-block';
         return;
     }
@@ -824,109 +810,81 @@ function buyPuzzlePart(pieceId) {
     score -= cost;
     purchasedPuzzlePieces.add(pieceId);
     updateScore();
-    updateMarketDisplay();
+    updateMarketDisplay(pieceId);
 
-    if (purchasedPuzzlePieces.size === puzzlePieceCosts.length) {
+    if (purchasedPuzzlePieces.size === puzzleCellCount) {
         revealCompletedPuzzle();
     }
 }
 
-function updateMarketDisplay() {
-    for (let i = 0; i < puzzlePieceCosts.length; i++) {
+function updateMarketDisplay(newlyOpenedId = -1) {
+    const progress = document.getElementById('puzzleProgress');
+    if (progress) {
+        progress.textContent = `Открыто частей: ${purchasedPuzzlePieces.size}/${puzzleCellCount}`;
+    }
+
+    for (let i = 0; i < puzzleCellCount; i++) {
         const piece = document.querySelector(`.puzzle-piece[data-piece-id="${i}"]`);
-        const item = document.querySelector(`.market-item[data-piece-id="${i}"]`);
-        const btn = item ? item.querySelector('.btn-market') : null;
+        if (!piece) continue;
 
         if (purchasedPuzzlePieces.has(i)) {
-            if (piece) {
-                piece.classList.add('unlocked');
-                piece.textContent = '✓';
+            piece.disabled = true;
+            piece.classList.remove('puzzle-piece-locked');
+            piece.classList.add('puzzle-piece-opened');
+            piece.innerHTML = '<span class="puzzle-piece-opened-text">Открыто</span>';
+            if (i === newlyOpenedId) {
+                triggerGlassBreak(piece);
             }
-            if (item) item.classList.add('purchased');
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = 'Куплено';
-            }
+            continue;
         }
+
+        piece.disabled = false;
+        piece.classList.remove('puzzle-piece-opened');
+        piece.classList.add('puzzle-piece-locked');
+        piece.innerHTML = `
+            <span class="puzzle-piece-number">${i + 1}</span>
+            <span class="puzzle-piece-cost">${puzzlePieceCosts[i] || 0} баллов</span>
+        `;
     }
 }
 
 function revealCompletedPuzzle() {
     const preview = document.getElementById('puzzlePreview');
-    const pieces = preview.querySelectorAll('.puzzle-piece');
-
-    pieces.forEach((piece, i) => {
-        const row = Math.floor(i / puzzleCols);
-        const col = i % puzzleCols;
-        piece.classList.add('revealed');
-        piece.textContent = '';
-        piece.style.backgroundImage = `url("${puzzleImageUrl}")`;
-        piece.style.backgroundSize = `${puzzleCols * 100}% ${puzzleRows * 100}%`;
-        piece.style.backgroundPosition = `${(col / (puzzleCols - 1)) * 100}% ${(row / (puzzleRows - 1)) * 100}%`;
-    });
+    if (!preview) return;
+    preview.classList.add('puzzle-preview-complete');
+    preview.innerHTML = `<img class="puzzle-final-photo" src="${puzzleImageUrl}" alt="Открытое фото" />`;
 
     const message = document.createElement('div');
     message.className = 'gift-message';
-    message.textContent = 'Пазл собран. Фото открыто.';
+    message.textContent = `Все ${puzzleCellCount} ячеек открыты. Фото показано полностью.`;
     const exists = document.querySelector('#marketContainer .gift-message');
     if (!exists) {
         document.getElementById('marketContainer').prepend(message);
     }
 }
 
-function buildPuzzleEdges(rows, cols) {
-    const edges = [];
-    for (let r = 0; r < rows; r++) {
-        edges[r] = [];
-        for (let c = 0; c < cols; c++) {
-            const top = r === 0 ? 0 : -edges[r - 1][c].bottom;
-            const left = c === 0 ? 0 : -edges[r][c - 1].right;
-            const right = c === cols - 1 ? 0 : ((r + c) % 2 === 0 ? 1 : -1);
-            const bottom = r === rows - 1 ? 0 : ((r * 3 + c) % 2 === 0 ? -1 : 1);
-            edges[r][c] = { top, right, bottom, left };
-        }
+function triggerGlassBreak(piece) {
+    piece.classList.add('glass-break');
+    for (let i = 0; i < 9; i++) {
+        const shard = document.createElement('span');
+        shard.className = 'glass-shard';
+        shard.style.setProperty('--shard-x', `${(Math.random() - 0.5) * 96}px`);
+        shard.style.setProperty('--shard-y', `${(Math.random() - 0.5) * 96}px`);
+        shard.style.setProperty('--shard-rot', `${Math.floor(Math.random() * 220 - 110)}deg`);
+        shard.style.left = `${25 + Math.random() * 50}%`;
+        shard.style.top = `${25 + Math.random() * 50}%`;
+        piece.appendChild(shard);
     }
-    return edges;
-}
 
-function applyPuzzleShape(piece, row, col) {
-    const edge = puzzleEdges[row][col];
-    const path = buildPuzzlePath(edge);
-    piece.style.clipPath = `path('${path}')`;
-    piece.style.webkitClipPath = `path('${path}')`;
-}
-
-function buildPuzzlePath(edge) {
-    const tabOut = 6;
-    const tabIn = 18;
-    const curveStart = 35;
-    const curveEnd = 65;
-
-    const topY = edge.top === 1 ? tabOut : edge.top === -1 ? tabIn : 0;
-    const rightX = edge.right === 1 ? 100 - tabOut : edge.right === -1 ? 100 - tabIn : 100;
-    const bottomY = edge.bottom === 1 ? 100 - tabOut : edge.bottom === -1 ? 100 - tabIn : 100;
-    const leftX = edge.left === 1 ? tabOut : edge.left === -1 ? tabIn : 0;
-
-    return [
-        'M 0 0',
-        edge.top === 0
-            ? 'L 100 0'
-            : `L ${curveStart} 0 C 42 ${topY} 58 ${topY} ${curveEnd} 0 L 100 0`,
-        edge.right === 0
-            ? 'L 100 100'
-            : `L 100 ${curveStart} C ${rightX} 42 ${rightX} 58 100 ${curveEnd} L 100 100`,
-        edge.bottom === 0
-            ? 'L 0 100'
-            : `L ${curveEnd} 100 C 58 ${bottomY} 42 ${bottomY} ${curveStart} 100 L 0 100`,
-        edge.left === 0
-            ? 'L 0 0 Z'
-            : `L 0 ${curveEnd} C ${leftX} 58 ${leftX} 42 0 ${curveStart} L 0 0 Z`
-    ].join(' ');
+    setTimeout(() => {
+        piece.classList.remove('glass-break');
+        piece.querySelectorAll('.glass-shard').forEach((shard) => shard.remove());
+    }, 620);
 }
 
 function proceedFromMarket() {
-    if (purchasedPuzzlePieces.size < puzzlePieceCosts.length) {
-        showPopup('Сначала собери все 8 частей пазла', 'warn');
+    if (purchasedPuzzlePieces.size < puzzleCellCount) {
+        showPopup(`Открой все ${puzzleCellCount} ячеек сетки`, 'warn');
         return;
     }
     hideAllScreens();

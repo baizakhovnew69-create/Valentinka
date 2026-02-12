@@ -1,6 +1,6 @@
 ﻿let score = 0;
 let purchasedPuzzlePieces = new Set();
-const puzzleImageUrl = 'puzzle.jpg';
+const puzzleImageUrl = 'photo1.png';
 const puzzleRows = 2;
 const puzzleCols = 4;
 const puzzlePieceCosts = [100, 120, 145, 160, 180, 220, 250, 300];

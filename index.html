@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>Валентинка 💝</title>
+    <title>Валентинка 💖</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,153 +14,118 @@
     <div class="stars-background"></div>
 
     <div class="container">
-        <!-- Счётчик баллов -->
         <div class="score-board">
-            <span class="score-label">🌟 Баллы:</span>
+            <span class="score-label">Баллы:</span>
             <span class="score-value" id="score">0</span>
         </div>
 
-        <!-- Главный контент -->
         <div class="content-wrapper" id="mainContent">
-            <h1 class="title">С Днём Святого Валентина! 💖</h1>
-            
-            <div class="heart-big" id="mainHeart">
-                <svg viewBox="0 0 100 100">
-                    <path d="M50,90 C20,70 10,50 10,40 C10,20 25,10 35,10 C45,10 50,15 50,15 C50,15 55,10 65,10 C75,10 90,20 90,40 C90,50 80,70 50,90 Z" 
-                          fill="url(#heartGradient)" />
-                    <defs>
-                        <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#ff1493;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#ff69b4;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                </svg>
-            </div>
-
-            <p class="subtitle">Но сначала сыграй в мини-игры! 🌟</p>
-
-            <!-- Кнопка для начала игр -->
-            <button class="btn btn-primary" onclick="startGames()" id="startBtn">Начать испытание! 🌟</button>
-
-            <div id="response" class="response"></div>
-
-            <div class="hearts-floating">
-                <div class="floating-heart">💕</div>
-                <div class="floating-heart">💖</div>
-                <div class="floating-heart">💗</div>
-                <div class="floating-heart">💝</div>
-                <div class="floating-heart">💞</div>
-            </div>
+            <h1 class="title">Испытание сердца</h1>
+            <p class="subtitle">8 сложных игр. Собери достаточно баллов и открой весь пазл.</p>
+            <button class="btn btn-primary" onclick="startGames()" id="startBtn">Начать испытание</button>
+            <div id="introResponse" class="response"></div>
         </div>
 
-        <!-- Игра 1: Поймай сердца -->
         <div class="game-container" id="game1" style="display:none;">
-            <h2 class="game-title">Игра 1: Поймай сердца! 💕</h2>
-            <p class="game-description">Кликай по падающим сердцам за 30 секунд!</p>
-            <div class="game-area" id="gameArea"></div>
+            <h2 class="game-title">Игра 1: Ливень сердец</h2>
+            <p class="game-description">Поймай 18 сердец за 25 секунд.</p>
+            <div class="game-area" id="game1Area"></div>
             <div class="game-stats">
-                <span>Время: <span id="timer">30</span>s</span>
-                <span>Поймано: <span id="caught">0</span>/10</span>
+                <span>Время: <span id="game1Timer">25</span>s</span>
+                <span>Поймано: <span id="game1Caught">0</span>/18</span>
             </div>
         </div>
 
-        <!-- Игра 2: Угадай число -->
         <div class="game-container" id="game2" style="display:none;">
-            <h2 class="game-title">Игра 2: Угадай число! 🌟</h2>
-            <p class="game-description">Угадай число от 1 до 10 за 3 попытки</p>
-            <div class="number-game">
-                <input type="number" id="numberInput" min="1" max="10" placeholder="Введи число..." class="number-input">
-                <button class="btn btn-small" onclick="guessNumber()">Проверить</button>
-                <div id="numberResult" class="game-result"></div>
-                <div id="attemptsLeft">Осталось попыток: 3</div>
-            </div>
-        </div>
-
-        <!-- Игра 3: Память -->
-        <div class="game-container" id="game3" style="display:none;">
-            <h2 class="game-title">Игра 3: Память! 💝</h2>
-            <p class="game-description">Запомни последовательность эмодзи</p>
-            <div class="memory-game">
-                <div class="sequence-display" id="sequenceDisplay"></div>
-                <div class="memory-buttons" id="memoryButtons"></div>
-                <div id="memoryResult" class="game-result"></div>
-            </div>
-        </div>
-
-        <!-- Игра 4: Быстрые клики -->
-        <div class="game-container" id="game4" style="display:none;">
-            <h2 class="game-title">Игра 4: Молниеносные клики! ⚡</h2>
-            <p class="game-description">Кликай на появляющиеся эмодзи за 20 секунд!</p>
-            <div class="game-area" id="gameArea4"></div>
+            <h2 class="game-title">Игра 2: Точный выбор</h2>
+            <p class="game-description">Жми только на золотые сердца. Ошибки режут счет.</p>
             <div class="game-stats">
-                <span>Время: <span id="game4Timer">20</span>s</span>
-                <span>Кликов: <span id="game4Clicks">0</span>/15</span>
+                <span>Время: <span id="game2Timer">22</span>s</span>
+                <span>Попаданий: <span id="game2Hits">0</span>/24</span>
             </div>
+            <div class="target-board" id="game2Board"></div>
         </div>
 
-        <!-- Игра 5: Выбери свою любовь -->
+        <div class="game-container" id="game3" style="display:none;">
+            <h2 class="game-title">Игра 3: Память цепочки</h2>
+            <p class="game-description">Запомни последовательность до 7 символов.</p>
+            <div class="sequence-display" id="seqDisplay"></div>
+            <div class="memory-buttons" id="seqButtons"></div>
+            <div id="seqInfo" class="game-result"></div>
+        </div>
+
+        <div class="game-container" id="game4" style="display:none;">
+            <h2 class="game-title">Игра 4: Печатай быстро</h2>
+            <p class="game-description">Введи 3 фразы без ошибок до конца таймера.</p>
+            <div class="quiz-question" id="typeTarget"></div>
+            <input class="number-input" id="typeInput" placeholder="Введи фразу точно" autocomplete="off">
+            <button class="btn btn-small" onclick="submitTypingRound()">Проверить</button>
+            <div class="game-stats">
+                <span>Время: <span id="typeTimer">40</span>s</span>
+                <span>Прогресс: <span id="typeProgress">0</span>/3</span>
+            </div>
+            <div id="typeInfo" class="game-result"></div>
+        </div>
+
         <div class="game-container" id="game5" style="display:none;">
-            <h2 class="game-title">Игра 5: Выбери свою любовь! 💕</h2>
-            <p class="game-description">Ответь на вопросы про нашу любовь</p>
-            <div id="quizContainer"></div>
+            <h2 class="game-title">Игра 5: Математический спринт</h2>
+            <p class="game-description">Реши 10 примеров. Нужна скорость и точность.</p>
+            <div class="quiz-question" id="mathQuestion"></div>
+            <input class="number-input" id="mathAnswer" type="number" placeholder="Ответ" autocomplete="off">
+            <button class="btn btn-small" onclick="submitMathAnswer()">Ответить</button>
+            <div class="game-stats">
+                <span>Время: <span id="mathTimer">45</span>s</span>
+                <span>Решено: <span id="mathProgress">0</span>/10</span>
+            </div>
+            <div id="mathInfo" class="game-result"></div>
         </div>
 
-        <!-- Маркет подарков -->
-        <div class="market-container" id="marketContainer" style="display:none;">
-            <h2 class="game-title">🎁 Маркет Секретного Подарка 🎁</h2>
-            <p class="game-description">Собери подарок, потратив баллы!</p>
-            
-            <div class="gift-preview">
-                <div class="gift-piece gift-piece-1" id="giftPiece1">?</div>
-                <div class="gift-piece gift-piece-2" id="giftPiece2">?</div>
-                <div class="gift-piece gift-piece-3" id="giftPiece3">?</div>
-                <div class="gift-piece gift-piece-4" id="giftPiece4">?</div>
-                <div class="gift-piece gift-piece-5" id="giftPiece5">?</div>
-            </div>
+        <div class="game-container" id="game6" style="display:none;">
+            <h2 class="game-title">Игра 6: Маршрут памяти</h2>
+            <p class="game-description">Запомни маршрут на сетке 4x4 и повтори его.</p>
+            <div class="sequence-display" id="patternShow"></div>
+            <div class="pattern-grid" id="patternGrid"></div>
+            <div id="patternInfo" class="game-result"></div>
+        </div>
 
-            <div class="market-items">
-                <div class="market-item" data-gift-id="0">
-                    <span class="item-name">🌹 Роза</span>
-                    <span class="item-cost">50 баллов</span>
-                    <button class="btn-market" onclick="buyGiftPart(0, 50)">Купить</button>
-                </div>
-                <div class="market-item" data-gift-id="1">
-                    <span class="item-name">🎀 Бант</span>
-                    <span class="item-cost">60 баллов</span>
-                    <button class="btn-market" onclick="buyGiftPart(1, 60)">Купить</button>
-                </div>
-                <div class="market-item" data-gift-id="2">
-                    <span class="item-name">💌 Письмо</span>
-                    <span class="item-cost">70 баллов</span>
-                    <button class="btn-market" onclick="buyGiftPart(2, 70)">Купить</button>
-                </div>
-                <div class="market-item" data-gift-id="3">
-                    <span class="item-name">💐 Букет</span>
-                    <span class="item-cost">80 баллов</span>
-                    <button class="btn-market" onclick="buyGiftPart(3, 80)">Купить</button>
-                </div>
-                <div class="market-item" data-gift-id="4">
-                    <span class="item-name">💎 Бриллиант</span>
-                    <span class="item-cost">100 баллов</span>
-                    <button class="btn-market" onclick="buyGiftPart(4, 100)">Купить</button>
-                </div>
+        <div class="game-container" id="game7" style="display:none;">
+            <h2 class="game-title">Игра 7: Сложный квиз</h2>
+            <p class="game-description">Нужно минимум 4 правильных ответа из 6.</p>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div id="quizProgress" class="game-result"></div>
+        </div>
+
+        <div class="game-container" id="game8" style="display:none;">
+            <h2 class="game-title">Игра 8: Финальный рывок</h2>
+            <p class="game-description">Поймай 28 мишеней за 20 секунд.</p>
+            <div class="game-area" id="bossArea"></div>
+            <div class="game-stats">
+                <span>Время: <span id="bossTimer">20</span>s</span>
+                <span>Попаданий: <span id="bossHits">0</span>/28</span>
             </div>
+        </div>
+
+        <div class="market-container" id="marketContainer" style="display:none;">
+            <h2 class="game-title">Пазл из фото</h2>
+            <p class="game-description">Открой 8 частей пазла. Фото видно только после полной сборки.</p>
+
+            <div class="puzzle-preview puzzle-preview-8" id="puzzlePreview"></div>
+            <div class="market-items" id="marketItems"></div>
 
             <div id="marketButtons" style="text-align: center; margin-top: 30px;">
-                <button class="btn-next-market" onclick="proceedFromMarket()">Перейти дальше ➜</button>
-                <button class="btn-next-market" id="playAgainMarket" style="display:none; background: linear-gradient(135deg, #FF9800, #F57C00); margin-left: 10px;" onclick="playAgain()">Переиграть 🎮</button>
+                <button class="btn-next-market" onclick="proceedFromMarket()">Дальше</button>
+                <button class="btn-next-market" id="playAgainMarket" style="display:none; background: linear-gradient(135deg, #FF9800, #F57C00); margin-left: 10px;" onclick="playAgain()">Переиграть</button>
             </div>
         </div>
 
         <div class="final-question" id="finalQuestion" style="display:none;">
-            <h2 class="question">Отлично! Теперь главный вопрос: Ты моя валентинка? 💕</h2>
-            
+            <h2 class="question">Ты моя валентинка? 💖</h2>
             <div class="button-container">
-                <button class="btn btn-yes" onclick="handleYes()">Да! ❤️</button>
+                <button class="btn btn-yes" onclick="handleYes()">Да</button>
                 <button class="btn btn-no" id="noBtn">Нет</button>
             </div>
-
-            <div id="response" class="response"></div>
+            <div class="response"></div>
         </div>
     </div>
 

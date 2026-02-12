@@ -2272,3 +2272,38 @@ body::after {
 .game-popup.warn {
     background: rgba(173, 91, 55, 0.92);
 }
+
+.photo-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(28, 18, 13, 0.45);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+.photo-popup-overlay.show {
+    opacity: 1;
+}
+
+.photo-popup-card {
+    width: min(88vw, 420px);
+    max-height: 78vh;
+    background: rgba(255, 251, 246, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 14px;
+    box-shadow: 0 14px 36px rgba(38, 24, 17, 0.3);
+    padding: 10px;
+}
+
+.photo-popup-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+}

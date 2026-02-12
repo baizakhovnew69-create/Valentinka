@@ -1,4 +1,4 @@
-let score = 0;
+﻿let score = 0;
 let purchasedPuzzlePieces = new Set();
 const puzzleImageUrl = 'puzzle.jpg';
 const puzzleRows = 2;
@@ -57,6 +57,31 @@ function showPopupAndRun(message, type, action, duration = 1700, afterDelay = 12
     setTimeout(() => {
         if (typeof action === 'function') action();
     }, duration + afterDelay);
+}
+
+function showImagePopupAndRun(imageUrl, action, duration = 5000) {
+    let overlay = document.getElementById('photoPopupOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'photoPopupOverlay';
+        overlay.className = 'photo-popup-overlay';
+        overlay.innerHTML = `
+            <div class="photo-popup-card">
+                <img id="photoPopupImage" alt="Фото" />
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    const img = document.getElementById('photoPopupImage');
+    img.src = imageUrl;
+    overlay.classList.add('show');
+
+    if (overlay.hideTimer) clearTimeout(overlay.hideTimer);
+    overlay.hideTimer = setTimeout(() => {
+        overlay.classList.remove('show');
+        if (typeof action === 'function') action();
+    }, duration);
 }
 
 function reward(points, text) {
@@ -317,14 +342,14 @@ function startGame3() {
 // ===== Game 4 =====
 const typingPhrases = [
     { prompt: 'архитектура надежного интерфейса требует дисциплины и внимания к деталям', answer: 'архитектура надежного интерфейса требует дисциплины и внимания к деталям' },
-    { prompt: 'параллельная обработка событий усложняет отладку состояний в браузере', answer: 'параллельная обработка событий усложняет отладку состояний в браузере' },
+    { prompt: 'пепе вата шнене шнене вата вата шнене пепе вата фааа', answer: 'пепе вата шнене шнене вата вата шнене пепе вата фааа' },
     { prompt: 'оптимизация производительности важна даже для небольших интерактивных проектов', answer: 'оптимизация производительности важна даже для небольших интерактивных проектов' },
     { prompt: 'последовательное тестирование сценариев предотвращает скрытые регрессии', answer: 'последовательное тестирование сценариев предотвращает скрытые регрессии' },
     { prompt: 'комплексные пользовательские потоки нужно валидировать на мобильных устройствах', answer: 'комплексные пользовательские потоки нужно валидировать на мобильных устройствах' }
 ];
 const fixedTypingTask = {
     prompt: 'Дополни фразу : Я тебя очень сильно Л****',
-    answer: 'я тебя очень сильно люблю'
+    answer: 'Я тебя очень сильно люблю'
 };
 
 function startGame4() {
@@ -339,23 +364,39 @@ function startGame4() {
 
     const randomThree = typingPhrases.slice().sort(() => Math.random() - 0.5).slice(0, 3);
     const list = [...randomThree, fixedTypingTask];
-    let timer = 70;
     let done = 0;
 
-    gameState.game4 = { list, done, active: 0, ended: false };
+    gameState.game4 = {
+        list,
+        done,
+        active: 0,
+        ended: false,
+        phraseTime: 60
+    };
 
     inputEl.value = '';
     targetEl.textContent = list[0].prompt;
     progressEl.textContent = String(done);
-    timerEl.textContent = String(timer);
+    timerEl.textContent = String(gameState.game4.phraseTime);
     info.textContent = '';
     inputEl.focus();
 
-    gameState.game4.tick = setInterval(() => {
-        timer -= 1;
-        timerEl.textContent = String(timer);
-        if (timer <= 0) {
-            finishGame4();
+    startGame4PhraseTimer();
+}
+
+function startGame4PhraseTimer() {
+    const state = gameState.game4;
+    if (!state || state.ended) return;
+
+    const timerEl = document.getElementById('typeTimer');
+    clearIntervals([state.tick]);
+    timerEl.textContent = String(state.phraseTime);
+
+    state.tick = setInterval(() => {
+        state.phraseTime -= 1;
+        timerEl.textContent = String(state.phraseTime);
+        if (state.phraseTime <= 0) {
+            finishGame4(false);
         }
     }, 1000);
 }
@@ -371,7 +412,7 @@ function submitTypingRound() {
 
     const typed = inputEl.value.trim().toLowerCase();
     const task = state.list[state.active];
-    const needed = task.answer;
+    const needed = task.answer.trim().toLowerCase();
 
     if (typed === needed) {
         state.done += 1;
@@ -380,16 +421,18 @@ function submitTypingRound() {
         inputEl.value = '';
         info.textContent = 'Точно!';
         if (state.done >= 4) {
-            finishGame4(true);
+            finishGame4(true, task === fixedTypingTask);
             return;
         }
+        state.phraseTime = 60;
         targetEl.textContent = state.list[state.active].prompt;
+        startGame4PhraseTimer();
     } else {
         info.textContent = 'Есть ошибка, попробуй снова';
     }
 }
 
-function finishGame4(forceWin = false) {
+function finishGame4(forceWin = false, showPhoto = false) {
     const state = gameState.game4;
     if (!state || state.ended) return;
     state.ended = true;
@@ -398,8 +441,14 @@ function finishGame4(forceWin = false) {
     const done = state.done;
     const passed = forceWin || done >= 4;
     if (passed) {
-        reward(230, 'Игра 4 пройдена!');
-        nextGame(startGame5);
+        if (showPhoto) {
+            score += 230;
+            updateScore();
+            showImagePopupAndRun('photo1.png', () => nextGame(startGame5, 0), 5000);
+        } else {
+            reward(230, 'Игра 4 пройдена!');
+            nextGame(startGame5);
+        }
     } else {
         showPopupAndRun(
             'Игра 4 не пройдена идеально. Повторяем уровень.',

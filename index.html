@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>Валентинка 💖</title>
+    <title>Валентинка to my Love 💖</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,18 +21,19 @@
 
         <div class="content-wrapper" id="mainContent">
             <h1 class="title">Испытание сердца</h1>
-            <p class="subtitle">8 сложных игр. Собери достаточно баллов и открой весь пазл.</p>
+            <p class="subtitle">8 сложных игр. Собери достаточно баллов и открой чудо.</p>
             <button class="btn btn-primary" onclick="startGames()" id="startBtn">Начать испытание</button>
             <div id="introResponse" class="response"></div>
         </div>
 
         <div class="game-container" id="game1" style="display:none;">
             <h2 class="game-title">Игра 1: Ливень сердец</h2>
-            <p class="game-description">Поймай 18 сердец за 25 секунд.</p>
+            <p class="game-description">Поймай 32 сердца, избегай бомб, у тебя 3 жизни.</p>
             <div class="game-area" id="game1Area"></div>
             <div class="game-stats">
                 <span>Время: <span id="game1Timer">25</span>s</span>
-                <span>Поймано: <span id="game1Caught">0</span>/18</span>
+                <span>Поймано: <span id="game1Caught">0</span>/32</span>
+                <span>Жизни: <span id="game1Lives">3</span></span>
             </div>
         </div>
 
@@ -61,7 +62,7 @@
             <input class="number-input" id="typeInput" placeholder="Введи фразу точно" autocomplete="off">
             <button class="btn btn-small" onclick="submitTypingRound()">Проверить</button>
             <div class="game-stats">
-                <span>Время: <span id="typeTimer">40</span>s</span>
+                <span>Время: <span id="typeTimer">100</span>s</span>
                 <span>Прогресс: <span id="typeProgress">0</span>/3</span>
             </div>
             <div id="typeInfo" class="game-result"></div>
@@ -74,7 +75,7 @@
             <input class="number-input" id="mathAnswer" type="number" placeholder="Ответ" autocomplete="off">
             <button class="btn btn-small" onclick="submitMathAnswer()">Ответить</button>
             <div class="game-stats">
-                <span>Время: <span id="mathTimer">45</span>s</span>
+                <span>Время: <span id="mathTimer">90</span>s</span>
                 <span>Решено: <span id="mathProgress">0</span>/10</span>
             </div>
             <div id="mathInfo" class="game-result"></div>
@@ -85,6 +86,7 @@
             <p class="game-description">Запомни маршрут на сетке 4x4 и повтори его.</p>
             <div class="sequence-display" id="patternShow"></div>
             <div class="pattern-grid" id="patternGrid"></div>
+            <button class="btn btn-small" onclick="replayGame6Route()">Показать маршрут снова</button>
             <div id="patternInfo" class="game-result"></div>
         </div>
 
@@ -98,7 +100,7 @@
 
         <div class="game-container" id="game8" style="display:none;">
             <h2 class="game-title">Игра 8: Финальный рывок</h2>
-            <p class="game-description">Поймай 28 мишеней за 20 секунд.</p>
+            <p class="game-description">Поймай 50 мишеней за 20 секунд.</p>
             <div class="game-area" id="bossArea"></div>
             <div class="game-stats">
                 <span>Время: <span id="bossTimer">20</span>s</span>
@@ -108,7 +110,7 @@
 
         <div class="market-container" id="marketContainer" style="display:none;">
             <h2 class="game-title">Пазл из фото</h2>
-            <p class="game-description">Открой 8 частей пазла. Фото видно только после полной сборки.</p>
+            <p class="game-description">Открой 8 частей пазла что бы увидеть Чудо))). Фото видно только после полной сборки.</p>
 
             <div class="puzzle-preview puzzle-preview-8" id="puzzlePreview"></div>
             <div class="market-items" id="marketItems"></div>
@@ -120,10 +122,10 @@
         </div>
 
         <div class="final-question" id="finalQuestion" style="display:none;">
-            <h2 class="question">Ты моя валентинка? 💖</h2>
+            <h2 class="question">Ты будешь моей валентинкой?🤨🤨🤨</h2>
             <div class="button-container">
-                <button class="btn btn-yes" onclick="handleYes()">Да</button>
-                <button class="btn btn-no" id="noBtn">Нет</button>
+                <button class="btn btn-yes" onclick="handleYes()">Да!</button>
+                <button class="btn btn-no" id="noBtn">Нет)))</button>
             </div>
             <div class="response"></div>
         </div>

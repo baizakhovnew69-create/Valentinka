@@ -1302,6 +1302,37 @@ body {
     }
 }
 
+.seq-step {
+    display: block;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    color: var(--ed-muted);
+}
+
+.seq-symbol {
+    display: inline-block;
+    font-size: 2.4rem;
+    line-height: 1;
+    margin-top: 8px;
+}
+
+.seq-show {
+    animation: seqPop 0.45s ease-out;
+}
+
+@keyframes seqPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.4) translateY(8px);
+        filter: blur(3px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
 /* ===== VISUAL REFRESH ===== */
 :root {
     --bg-top: #fff6ee;
@@ -2201,4 +2232,43 @@ body::after {
     .puzzle-preview-8 {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+.game-popup {
+    position: fixed;
+    left: 50%;
+    top: 22px;
+    transform: translateX(-50%) translateY(-18px);
+    opacity: 0;
+    z-index: 2200;
+    min-width: 260px;
+    max-width: min(92vw, 520px);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 12px 28px rgba(45, 30, 21, 0.22);
+    backdrop-filter: blur(8px);
+    color: #fffdf9;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.game-popup.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.game-popup.info {
+    background: rgba(67, 109, 163, 0.9);
+}
+
+.game-popup.success {
+    background: rgba(54, 141, 96, 0.92);
+}
+
+.game-popup.warn {
+    background: rgba(173, 91, 55, 0.92);
 }

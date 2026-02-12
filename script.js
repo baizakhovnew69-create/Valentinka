@@ -958,8 +958,9 @@ const persuasionMessages = [
 function moveButtonRandomly() {
     const noBtn = document.getElementById('noBtn');
     if (!noBtn) return;
-    const maxX = window.innerWidth - 140;
-    const maxY = window.innerHeight - 80;
+    const rect = noBtn.getBoundingClientRect();
+    const maxX = Math.max(0, window.innerWidth - rect.width - 10);
+    const maxY = Math.max(0, window.innerHeight - rect.height - 10);
     noBtn.style.left = `${Math.random() * maxX}px`;
     noBtn.style.top = `${Math.random() * maxY}px`;
 }

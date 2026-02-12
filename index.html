@@ -121,13 +121,15 @@
             </div>
         </div>
 
-        <div class="final-question" id="finalQuestion" style="display:none;">
-            <h2 class="question">Ты будешь моей валентинкой?🤨🤨🤨</h2>
-            <div class="button-container">
-                <button class="btn btn-yes" onclick="handleYes()">Да!</button>
-                <button class="btn btn-no" id="noBtn">Нет)))</button>
+        <div class="final-question final-redesign" id="finalQuestion" style="display:none;">
+            <p class="final-kicker">Финальный выбор</p>
+            <h2 class="question">Ты будешь моей валентинкой?</h2>
+            <p class="final-note">Осталось нажать только одну кнопку</p>
+            <div class="button-container final-actions">
+                <button class="btn btn-yes final-btn final-btn-yes" onclick="handleYes()">Да, конечно</button>
+                <button class="btn btn-no final-btn final-btn-no" id="noBtn">Нет...</button>
             </div>
-            <div class="response"></div>
+            <div class="response final-response" aria-live="polite"></div>
         </div>
     </div>
 

@@ -34,10 +34,35 @@ function updateScore() {
     if (scoreEl) scoreEl.textContent = String(score);
 }
 
+function showPopup(message, type = 'info', duration = 1700) {
+    let popup = document.getElementById('gamePopup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'gamePopup';
+        popup.className = 'game-popup';
+        document.body.appendChild(popup);
+    }
+
+    popup.textContent = message;
+    popup.className = `game-popup show ${type}`;
+
+    if (popup.hideTimer) clearTimeout(popup.hideTimer);
+    popup.hideTimer = setTimeout(() => {
+        popup.classList.remove('show');
+    }, duration);
+}
+
+function showPopupAndRun(message, type, action, duration = 1700, afterDelay = 120) {
+    showPopup(message, type, duration);
+    setTimeout(() => {
+        if (typeof action === 'function') action();
+    }, duration + afterDelay);
+}
+
 function reward(points, text) {
     score += points;
     updateScore();
-    if (text) alert(`${text} +${points} баллов`);
+    if (text) showPopup(`${text} +${points} баллов`, 'success');
 }
 
 function startGames() {
@@ -63,42 +88,89 @@ function startGame1() {
     const area = document.getElementById('game1Area');
     const timerEl = document.getElementById('game1Timer');
     const caughtEl = document.getElementById('game1Caught');
+    const livesEl = document.getElementById('game1Lives');
 
     area.innerHTML = '';
     let timer = 25;
     let caught = 0;
-    const target = 18;
+    let lives = 3;
+    const target = 32;
+    const bombPenalty = 30;
+    let ended = false;
 
     timerEl.textContent = String(timer);
     caughtEl.textContent = String(caught);
+    livesEl.textContent = String(lives);
 
     const spawn = setInterval(() => {
+        if (ended) return;
         const heart = document.createElement('div');
         heart.className = 'falling-heart';
-        heart.textContent = Math.random() > 0.45 ? '💖' : '💘';
+        const isBomb = Math.random() < 0.40;
+        heart.textContent = isBomb ? '💣' : (Math.random() > 0.45 ? '💖' : '💘');
         heart.style.left = `${Math.random() * Math.max(10, area.clientWidth - 46)}px`;
-        heart.style.animationDuration = `${0.7 + Math.random() * 0.5}s`;
+        heart.style.animationDuration = `${0.55 + Math.random() * 0.35}s`;
 
         heart.onclick = (e) => {
+            if (ended) return;
             e.stopPropagation();
+            if (isBomb) {
+                lives -= 1;
+                livesEl.textContent = String(lives);
+                score = Math.max(0, score - bombPenalty);
+                updateScore();
+                heart.remove();
+                createParticles(e.clientX, e.clientY, '💥');
+
+                if (lives <= 0) {
+                    ended = true;
+                    clearIntervals([spawn, tick]);
+                    showPopupAndRun(
+                        'Ты потерял все жизни. Переигрываем 1 уровень.',
+                        'warn',
+                        () => nextGame(startGame1, 0)
+                    );
+                }
+                return;
+            }
+
             caught += 1;
             caughtEl.textContent = String(caught);
             heart.remove();
             createParticles(e.clientX, e.clientY, '✨');
+
+            if (caught >= target) {
+                ended = true;
+                clearIntervals([spawn, tick]);
+                reward(260, 'Игра 1 пройдена!');
+                nextGame(startGame2, 800);
+            }
         };
 
         area.appendChild(heart);
-        setTimeout(() => heart.remove(), 1600);
-    }, 330);
+        setTimeout(() => heart.remove(), 1250);
+    }, 230);
 
     const tick = setInterval(() => {
         timer -= 1;
         timerEl.textContent = String(timer);
         if (timer <= 0) {
+            if (ended) return;
+            ended = true;
             clearIntervals([spawn, tick]);
-            const passed = caught >= target;
-            reward(passed ? 220 : 150, passed ? 'Игра 1 пройдена!' : 'Игра 1 завершена');
-            nextGame(startGame2);
+            if (caught >= target) {
+                showPopup('Отлично, уровень пройден!', 'success');
+                reward(260, 'Игра 1 пройдена!');
+                nextGame(startGame2, 700);
+            } else {
+                showPopupAndRun(
+                    'Время вышло. Чтобы пройти дальше, нужно поймать 32 сердца. Переигрываем уровень.',
+                    'warn',
+                    () => nextGame(startGame1, 0),
+                    1700,
+                    120
+                );
+            }
         }
     }, 1000);
 }
@@ -112,9 +184,9 @@ function startGame2() {
     const timerEl = document.getElementById('game2Timer');
     const hitsEl = document.getElementById('game2Hits');
 
-    let timer = 22;
+    let timer = 30;
     let hits = 0;
-    const targetHits = 24;
+    const targetHits = 16;
     timerEl.textContent = String(timer);
     hitsEl.textContent = String(hits);
 
@@ -123,14 +195,14 @@ function startGame2() {
         for (let i = 0; i < 12; i++) {
             const btn = document.createElement('button');
             btn.className = 'target-cell';
-            const good = Math.random() < 0.32;
+            const good = Math.random() < 0.55;
             btn.dataset.good = good ? '1' : '0';
             btn.textContent = good ? '💛' : '🩶';
             btn.onclick = () => {
                 if (btn.dataset.good === '1') {
                     hits += 1;
                 } else {
-                    hits = Math.max(0, hits - 1);
+                    hits = Math.max(0, hits - 0);
                 }
                 hitsEl.textContent = String(hits);
                 renderBoard();
@@ -140,21 +212,29 @@ function startGame2() {
     }
 
     renderBoard();
-    const rerender = setInterval(renderBoard, 900);
+    const rerender = setInterval(renderBoard, 1300);
     const tick = setInterval(() => {
         timer -= 1;
         timerEl.textContent = String(timer);
         if (timer <= 0) {
             clearIntervals([rerender, tick]);
             const passed = hits >= targetHits;
-            reward(passed ? 210 : 145, passed ? 'Игра 2 пройдена!' : 'Игра 2 завершена');
-            nextGame(startGame3);
+            if (passed) {
+                reward(210, 'Игра 2 пройдена!');
+                nextGame(startGame3);
+            } else {
+                showPopupAndRun(
+                    'Игра 2 не пройдена идеально. Нужны все условия для перехода дальше.',
+                    'warn',
+                    () => nextGame(startGame2, 0)
+                );
+            }
         }
     }, 1000);
 }
 
 // ===== Game 3 =====
-const memoryEmojis = ['💖', '💘', '💝', '💗'];
+const memoryEmojis = ['⚡', '🌙', '⭐', '🎵'];
 function startGame3() {
     hideAllScreens();
     document.getElementById('game3').style.display = 'block';
@@ -180,8 +260,11 @@ function startGame3() {
             if (input[idx] !== sequence[idx]) {
                 allowInput = false;
                 info.textContent = `Ошибка на уровне ${level}`;
-                reward(155 + level * 8, 'Игра 3 завершена');
-                nextGame(startGame4, 1100);
+                showPopupAndRun(
+                    'Игра 3 не пройдена идеально. Повторяем уровень.',
+                    'warn',
+                    () => nextGame(startGame3, 0)
+                );
                 return;
             }
 
@@ -203,9 +286,12 @@ function startGame3() {
 
     function showSequence() {
         let i = 0;
-        display.textContent = '';
+        display.innerHTML = '';
         const interval = setInterval(() => {
-            display.textContent = sequence[i];
+            display.innerHTML = `
+                <span class="seq-step">Шаг ${i + 1}</span>
+                <span class="seq-symbol seq-show">${sequence[i]}</span>
+            `;
             i += 1;
             if (i >= sequence.length) {
                 clearInterval(interval);
@@ -214,7 +300,7 @@ function startGame3() {
                     allowInput = true;
                 }, 350);
             }
-        }, 620);
+        }, 720);
     }
 
     function nextRound() {
@@ -230,12 +316,16 @@ function startGame3() {
 
 // ===== Game 4 =====
 const typingPhrases = [
-    'любовь это выбор каждый день',
-    'сердце помнит важные моменты',
-    'ты сияешь ярче всех звезд',
-    'самое ценное это внимание',
-    'вместе можно пройти все'
+    { prompt: 'архитектура надежного интерфейса требует дисциплины и внимания к деталям', answer: 'архитектура надежного интерфейса требует дисциплины и внимания к деталям' },
+    { prompt: 'параллельная обработка событий усложняет отладку состояний в браузере', answer: 'параллельная обработка событий усложняет отладку состояний в браузере' },
+    { prompt: 'оптимизация производительности важна даже для небольших интерактивных проектов', answer: 'оптимизация производительности важна даже для небольших интерактивных проектов' },
+    { prompt: 'последовательное тестирование сценариев предотвращает скрытые регрессии', answer: 'последовательное тестирование сценариев предотвращает скрытые регрессии' },
+    { prompt: 'комплексные пользовательские потоки нужно валидировать на мобильных устройствах', answer: 'комплексные пользовательские потоки нужно валидировать на мобильных устройствах' }
 ];
+const fixedTypingTask = {
+    prompt: 'Дополни фразу : Я тебя очень сильно Л****',
+    answer: 'я тебя очень сильно люблю'
+};
 
 function startGame4() {
     hideAllScreens();
@@ -247,14 +337,15 @@ function startGame4() {
     const progressEl = document.getElementById('typeProgress');
     const info = document.getElementById('typeInfo');
 
-    const list = typingPhrases.slice().sort(() => Math.random() - 0.5).slice(0, 3);
-    let timer = 40;
+    const randomThree = typingPhrases.slice().sort(() => Math.random() - 0.5).slice(0, 3);
+    const list = [...randomThree, fixedTypingTask];
+    let timer = 70;
     let done = 0;
 
     gameState.game4 = { list, done, active: 0, ended: false };
 
     inputEl.value = '';
-    targetEl.textContent = list[0];
+    targetEl.textContent = list[0].prompt;
     progressEl.textContent = String(done);
     timerEl.textContent = String(timer);
     info.textContent = '';
@@ -279,7 +370,8 @@ function submitTypingRound() {
     const info = document.getElementById('typeInfo');
 
     const typed = inputEl.value.trim().toLowerCase();
-    const needed = state.list[state.active];
+    const task = state.list[state.active];
+    const needed = task.answer;
 
     if (typed === needed) {
         state.done += 1;
@@ -287,11 +379,11 @@ function submitTypingRound() {
         progressEl.textContent = String(state.done);
         inputEl.value = '';
         info.textContent = 'Точно!';
-        if (state.done >= 3) {
+        if (state.done >= 4) {
             finishGame4(true);
             return;
         }
-        targetEl.textContent = state.list[state.active];
+        targetEl.textContent = state.list[state.active].prompt;
     } else {
         info.textContent = 'Есть ошибка, попробуй снова';
     }
@@ -304,9 +396,17 @@ function finishGame4(forceWin = false) {
     clearIntervals([state.tick]);
 
     const done = state.done;
-    const passed = forceWin || done >= 3;
-    reward(passed ? 230 : 150 + done * 20, passed ? 'Игра 4 пройдена!' : 'Игра 4 завершена');
-    nextGame(startGame5);
+    const passed = forceWin || done >= 4;
+    if (passed) {
+        reward(230, 'Игра 4 пройдена!');
+        nextGame(startGame5);
+    } else {
+        showPopupAndRun(
+            'Игра 4 не пройдена идеально. Повторяем уровень.',
+            'warn',
+            () => nextGame(startGame4, 0)
+        );
+    }
 }
 
 // ===== Game 5 =====
@@ -392,10 +492,17 @@ function finishGame5() {
     state.ended = true;
     clearIntervals([state.tick]);
 
-    const passed = state.correct >= 7;
-    const points = passed ? 240 : 160 + state.correct * 8;
-    reward(points, passed ? 'Игра 5 пройдена!' : 'Игра 5 завершена');
-    nextGame(startGame6);
+    const passed = state.solved === 10 && state.correct === 10;
+    if (passed) {
+        reward(260, 'Игра 5 пройдена идеально!');
+        nextGame(startGame6);
+    } else {
+        showPopupAndRun(
+            'Игра 5 не пройдена идеально. Нужно 10/10 правильных.',
+            'warn',
+            () => nextGame(startGame5, 0)
+        );
+    }
 }
 
 // ===== Game 6 =====
@@ -413,9 +520,13 @@ function startGame6() {
         if (!order.includes(n)) order.push(n);
     }
 
-    let input = [];
-    let unlocked = false;
-    gameState.game6 = { order, input, ended: false };
+    gameState.game6 = {
+        order,
+        input: [],
+        ended: false,
+        unlocked: false,
+        replaying: false
+    };
 
     grid.innerHTML = '';
     for (let i = 0; i < 16; i++) {
@@ -424,20 +535,23 @@ function startGame6() {
         btn.textContent = '';
         btn.onclick = () => {
             const state = gameState.game6;
-            if (!unlocked || state.ended) return;
-            input.push(i);
+            if (!state || !state.unlocked || state.ended || state.replaying) return;
+            state.input.push(i);
             btn.classList.add('active');
 
-            const idx = input.length - 1;
-            if (input[idx] !== order[idx]) {
+            const idx = state.input.length - 1;
+            if (state.input[idx] !== state.order[idx]) {
                 state.ended = true;
                 info.textContent = 'Маршрут нарушен';
-                reward(170, 'Игра 6 завершена');
-                nextGame(startGame7, 900);
+                showPopupAndRun(
+                    'Игра 6 не пройдена идеально. Повторяем уровень.',
+                    'warn',
+                    () => nextGame(startGame6, 0)
+                );
                 return;
             }
 
-            if (input.length === order.length) {
+            if (state.input.length === state.order.length) {
                 state.ended = true;
                 info.textContent = 'Маршрут повторен';
                 reward(250, 'Игра 6 пройдена!');
@@ -447,25 +561,48 @@ function startGame6() {
         grid.appendChild(btn);
     }
 
-    info.textContent = 'Смотри маршрут';
-    let pointer = 0;
+    showGame6Route();
+}
+
+function showGame6Route() {
+    const state = gameState.game6;
+    if (!state || state.ended || state.replaying) return;
+
+    const show = document.getElementById('patternShow');
+    const grid = document.getElementById('patternGrid');
+    const info = document.getElementById('patternInfo');
     const cells = grid.querySelectorAll('.pattern-cell');
+
+    state.replaying = true;
+    state.unlocked = false;
+    state.input = [];
+
+    cells.forEach((c) => c.classList.remove('show', 'active'));
+    show.textContent = `Маршрут длиной ${state.order.length}`;
+    info.textContent = 'Смотри маршрут';
+
+    let pointer = 0;
     const showInterval = setInterval(() => {
         cells.forEach((c) => c.classList.remove('show'));
-        cells[order[pointer]].classList.add('show');
+        cells[state.order[pointer]].classList.add('show');
         pointer += 1;
-        if (pointer >= order.length) {
+        if (pointer >= state.order.length) {
             clearInterval(showInterval);
             setTimeout(() => {
                 cells.forEach((c) => c.classList.remove('show'));
+                state.replaying = false;
+                state.unlocked = true;
                 show.textContent = 'Теперь повтори маршрут';
                 info.textContent = 'Кликай клетки в правильном порядке';
-                unlocked = true;
             }, 450);
         }
     }, 540);
+}
 
-    show.textContent = `Маршрут длиной ${order.length}`;
+function replayGame6Route() {
+    const state = gameState.game6;
+    if (!state || state.ended) return;
+    showGame6Route();
 }
 
 // ===== Game 7 =====
@@ -493,9 +630,17 @@ function renderQuizQuestion() {
     const progress = document.getElementById('quizProgress');
 
     if (state.idx >= quizData.length) {
-        const passed = state.correct >= 4;
-        reward(passed ? 230 : 155 + state.correct * 15, passed ? 'Игра 7 пройдена!' : 'Игра 7 завершена');
-        nextGame(startGame8, 800);
+        const passed = state.correct === quizData.length;
+        if (passed) {
+            reward(260, 'Игра 7 пройдена идеально!');
+            nextGame(startGame8, 800);
+        } else {
+            showPopupAndRun(
+                'Игра 7 не пройдена идеально. Нужны все правильные ответы.',
+                'warn',
+                () => nextGame(startGame7, 0)
+            );
+        }
         return;
     }
 
@@ -554,8 +699,16 @@ function startGame8() {
         if (timer <= 0) {
             clearIntervals([spawn, tick]);
             const passed = hits >= target;
-            reward(passed ? 280 : 180, passed ? 'Финальная игра пройдена!' : 'Финальная игра завершена');
-            nextGame(showMarket, 900);
+            if (passed) {
+                reward(280, 'Финальная игра пройдена!');
+                nextGame(showMarket, 900);
+            } else {
+                showPopupAndRun(
+                    'Финальная игра не пройдена идеально. Повторяем уровень.',
+                    'warn',
+                    () => nextGame(startGame8, 0)
+                );
+            }
         }
     }, 1000);
 }
@@ -724,7 +877,7 @@ function buildPuzzlePath(edge) {
 
 function proceedFromMarket() {
     if (purchasedPuzzlePieces.size < puzzlePieceCosts.length) {
-        alert('Сначала собери все 8 частей пазла');
+        showPopup('Сначала собери все 8 частей пазла', 'warn');
         return;
     }
     hideAllScreens();

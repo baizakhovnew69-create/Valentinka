@@ -172,13 +172,6 @@ function openSecretGift() {
     showMarket();
 }
 
-function openMarketForTest() {
-    score = 5000;
-    updateScore();
-    showPopup('Тестовый режим: баланс 5000', 'info', 1200);
-    showMarket();
-}
-
 function ensureSwitchGameButtons() {
     gameIds.forEach((id) => {
         const container = document.getElementById(id);

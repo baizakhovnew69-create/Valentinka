@@ -3297,10 +3297,6 @@ body::after {
     box-shadow: none;
 }
 
-.game-select-test-btn {
-    background: linear-gradient(135deg, #ff9800, #f57c00);
-}
-
 .switch-game-wrap {
     margin-top: 16px;
     text-align: center;

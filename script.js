@@ -29,6 +29,15 @@ function hideAllScreens() {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
+
+    const paperOverlay = document.getElementById('game9LoveOverlay');
+    if (paperOverlay) paperOverlay.classList.remove('show');
+
+    const emojiStorm = document.getElementById('loveEmojiStorm');
+    if (emojiStorm) {
+        emojiStorm.classList.remove('show');
+        emojiStorm.innerHTML = '';
+    }
 }
 
 function updateScore() {
@@ -796,6 +805,145 @@ const game9BonusCard = '🎁';
 const game9PairTarget = 12;
 const game9PreviewDuration = 15;
 const game9StartLives = 10;
+let game9LoveAcknowledgeHandler = null;
+
+function ensureGame9LoveOverlay() {
+    let overlay = document.getElementById('game9LoveOverlay');
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.id = 'game9LoveOverlay';
+    overlay.className = 'game9-love-overlay';
+    overlay.innerHTML = `
+        <div class="game9-love-paper">
+            <div class="game9-love-paper-inner">
+                <p class="game9-love-text">Я тебя люблю</p>
+                <button type="button" class="btn btn-small game9-love-btn" id="game9LoveAckBtn">Я знаю</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const ackBtn = overlay.querySelector('#game9LoveAckBtn');
+    if (ackBtn) {
+        ackBtn.addEventListener('click', () => {
+            if (typeof game9LoveAcknowledgeHandler === 'function') {
+                game9LoveAcknowledgeHandler();
+            }
+        });
+    }
+
+    return overlay;
+}
+
+function hideGame9LoveOverlay() {
+    const overlay = document.getElementById('game9LoveOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('show');
+}
+
+function createLoveEmojiStorm(duration = 2600) {
+    let layer = document.getElementById('loveEmojiStorm');
+    if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'loveEmojiStorm';
+        layer.className = 'love-emoji-storm';
+        document.body.appendChild(layer);
+    }
+
+    layer.innerHTML = '';
+    layer.classList.add('show');
+
+    const emojis = ['❤️', '💖', '💘', '💕', '💞', '🎆', '🎇', '✨', '🥰', '😍'];
+    const total = 180;
+    const w = Math.max(window.innerWidth, 320);
+    const h = Math.max(window.innerHeight, 320);
+
+    for (let i = 0; i < total; i++) {
+        const node = document.createElement('span');
+        node.className = 'love-emoji';
+        node.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+        const side = i % 4;
+        let startX = 0;
+        let startY = 0;
+        let dx = 0;
+        let dy = 0;
+
+        if (side === 0) {
+            startX = Math.random() * w;
+            startY = -26;
+            dx = (Math.random() - 0.5) * 180;
+            dy = h + 80 + Math.random() * 120;
+        } else if (side === 1) {
+            startX = w + 26;
+            startY = Math.random() * h;
+            dx = -(w + 80 + Math.random() * 120);
+            dy = (Math.random() - 0.5) * 200;
+        } else if (side === 2) {
+            startX = Math.random() * w;
+            startY = h + 26;
+            dx = (Math.random() - 0.5) * 180;
+            dy = -(h + 80 + Math.random() * 120);
+        } else {
+            startX = -26;
+            startY = Math.random() * h;
+            dx = w + 80 + Math.random() * 120;
+            dy = (Math.random() - 0.5) * 200;
+        }
+
+        node.style.left = `${startX}px`;
+        node.style.top = `${startY}px`;
+        node.style.fontSize = `${18 + Math.random() * 18}px`;
+        node.style.setProperty('--dx', `${dx}px`);
+        node.style.setProperty('--dy', `${dy}px`);
+        node.style.animationDelay = `${Math.random() * 0.65}s`;
+        node.style.animationDuration = `${1.8 + Math.random() * 1.8}s`;
+        layer.appendChild(node);
+    }
+
+    setTimeout(() => {
+        const currentLayer = document.getElementById('loveEmojiStorm');
+        if (!currentLayer) return;
+        currentLayer.classList.remove('show');
+        currentLayer.innerHTML = '';
+    }, duration + 1200);
+}
+
+function triggerGame9BonusSequence() {
+    const state = gameState.game9;
+    const info = document.getElementById('game9Info');
+    if (!state || state.ended || state.bonusActivated) return;
+
+    state.bonusActivated = true;
+    state.ended = true;
+    state.locked = true;
+    if (state.previewTick) clearInterval(state.previewTick);
+    if (state.flipBackTimeout) clearTimeout(state.flipBackTimeout);
+
+    if (info) info.textContent = 'Секретная записка для Медины';
+    renderGame9Grid();
+
+    const overlay = ensureGame9LoveOverlay();
+    if (!overlay) return;
+
+    game9LoveAcknowledgeHandler = () => {
+        const ackBtn = document.getElementById('game9LoveAckBtn');
+        if (ackBtn) ackBtn.disabled = true;
+
+        createLoveEmojiStorm(2600);
+        reward(320, 'Игра 9 пройдена!');
+
+        setTimeout(() => {
+            hideGame9LoveOverlay();
+            if (ackBtn) ackBtn.disabled = false;
+            game9LoveAcknowledgeHandler = null;
+            nextGame(startGame10, 0);
+        }, 2600);
+    };
+
+    overlay.classList.add('show');
+}
 
 function startGame9() {
     const prev = gameState.game9;
@@ -820,6 +968,7 @@ function startGame9() {
         firstPick: -1,
         locked: true,
         ended: false,
+        bonusActivated: false,
         previewTick: null,
         flipBackTimeout: null
     };
@@ -846,7 +995,7 @@ function startGame9() {
                 if (!card.matched) card.revealed = false;
             });
             renderGame9Grid();
-            if (info) info.textContent = 'Открывай пары. Бонусная карта открывается сама.';
+            if (info) info.textContent = 'Открывай пары. Если найдешь бонус, откроется секрет.';
         }
     }, 1000);
 }
@@ -902,6 +1051,7 @@ function pickGame9Card(index) {
         card.matched = true;
         renderGame9Grid();
         if (info) info.textContent = 'Бонусная карта открыта';
+        triggerGame9BonusSequence();
         return;
     }
 

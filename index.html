@@ -26,6 +26,24 @@
             <div id="introResponse" class="response"></div>
         </div>
 
+        <div class="game-container game-selector" id="gameSelector" style="display:none;">
+            <h2 class="game-title">Выбери любую игру</h2>
+            <p class="game-description">Игры проходятся в любом порядке. После победы ты вернешься сюда.</p>
+            <div class="game-select-grid">
+                <button class="game-select-btn" data-game-id="1" onclick="startSelectedGame(1)">1. Ливень сердец</button>
+                <button class="game-select-btn" data-game-id="2" onclick="startSelectedGame(2)">2. Точный выбор</button>
+                <button class="game-select-btn" data-game-id="3" onclick="startSelectedGame(3)">3. Память цепочки</button>
+                <button class="game-select-btn" data-game-id="4" onclick="startSelectedGame(4)">4. Печатай быстро</button>
+                <button class="game-select-btn" data-game-id="5" onclick="startSelectedGame(5)">5. Ритм сердца</button>
+                <button class="game-select-btn" data-game-id="6" onclick="startSelectedGame(6)">6. Маршрут памяти</button>
+                <button class="game-select-btn" data-game-id="7" onclick="startSelectedGame(7)">7. Сложный квиз</button>
+                <button class="game-select-btn" data-game-id="8" onclick="startSelectedGame(8)">8. Рывок на реакцию</button>
+                <button class="game-select-btn" data-game-id="9" onclick="startSelectedGame(9)">9. Логика 5x5</button>
+                <button class="game-select-btn" data-game-id="10" onclick="startSelectedGame(10)">10. Knife Hit</button>
+            </div>
+            <div id="gameSelectMessage" class="game-result game-select-message"></div>
+        </div>
+
         <div class="game-container" id="game1" style="display:none;">
             <h2 class="game-title">Игра 1: Ливень сердец</h2>
             <p class="game-description">Поймай 32 сердца, избегай бомб, у тебя 3 жизни.</p>

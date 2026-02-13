@@ -20,9 +20,24 @@ const gameState = {
 };
 
 const gameIds = ['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9', 'game10'];
+const completedGames = new Set();
+const gameNames = {
+    1: 'Игра 1',
+    2: 'Игра 2',
+    3: 'Игра 3',
+    4: 'Игра 4',
+    5: 'Игра 5',
+    6: 'Игра 6',
+    7: 'Игра 7',
+    8: 'Игра 8',
+    9: 'Игра 9',
+    10: 'Игра 10'
+};
 
 function hideAllScreens() {
     document.getElementById('mainContent').style.display = 'none';
+    const selector = document.getElementById('gameSelector');
+    if (selector) selector.style.display = 'none';
     document.getElementById('marketContainer').style.display = 'none';
     document.getElementById('finalQuestion').style.display = 'none';
     gameIds.forEach((id) => {
@@ -102,8 +117,63 @@ function reward(points, text) {
 }
 
 function startGames() {
+    showGameSelector();
+}
+
+function updateGameSelectorButtons() {
+    const buttons = document.querySelectorAll('.game-select-btn[data-game-id]');
+    buttons.forEach((btn) => {
+        const id = Number(btn.dataset.gameId);
+        const done = completedGames.has(id);
+        btn.classList.toggle('done', done);
+    });
+}
+
+function showGameSelector(message = '') {
     hideAllScreens();
-    startGame1();
+    const selector = document.getElementById('gameSelector');
+    if (selector) selector.style.display = 'block';
+
+    const messageEl = document.getElementById('gameSelectMessage');
+    if (messageEl) messageEl.textContent = message;
+    updateGameSelectorButtons();
+}
+
+function startSelectedGame(gameNumber) {
+    const gameMap = {
+        1: startGame1,
+        2: startGame2,
+        3: startGame3,
+        4: startGame4,
+        5: startGame5,
+        6: startGame6,
+        7: startGame7,
+        8: startGame8,
+        9: startGame9,
+        10: startGame10
+    };
+
+    const handler = gameMap[gameNumber];
+    if (typeof handler !== 'function') return;
+    handler();
+}
+
+function completeGame(gameNumber, points, label = '') {
+    const title = label || gameNames[gameNumber] || `Игра ${gameNumber}`;
+    const message = `Поздравляем! ${title} пройдена. Заработано ${points} баллов.`;
+
+    completedGames.add(gameNumber);
+    score += points;
+    updateScore();
+    updateGameSelectorButtons();
+
+    showPopupAndRun(
+        `${title} пройдена! +${points} баллов`,
+        'success',
+        () => showGameSelector(message),
+        1200,
+        80
+    );
 }
 
 function nextGame(nextFn, delay = 900) {
@@ -178,8 +248,7 @@ function startGame1() {
             if (caught >= target) {
                 ended = true;
                 clearIntervals([spawn, tick]);
-                reward(260, 'Игра 1 пройдена!');
-                nextGame(startGame2, 800);
+                completeGame(1, 260, 'Игра 1');
             }
         };
 
@@ -196,8 +265,7 @@ function startGame1() {
             clearIntervals([spawn, tick]);
             if (caught >= target) {
                 showPopup('Отлично, уровень пройден!', 'success');
-                reward(260, 'Игра 1 пройдена!');
-                nextGame(startGame2, 700);
+                completeGame(1, 260, 'Игра 1');
             } else {
                 showPopupAndRun(
                     'Время вышло. Чтобы пройти дальше, нужно поймать 32 сердца. Переигрываем уровень.',
@@ -256,8 +324,7 @@ function startGame2() {
             clearIntervals([rerender, tick]);
             const passed = hits >= targetHits;
             if (passed) {
-                reward(210, 'Игра 2 пройдена!');
-                nextGame(startGame3);
+                completeGame(2, 210, 'Игра 2');
             } else {
                 showPopupAndRun(
                     `Игра 2 не пройдена. Нужно минимум ${targetHits} попаданий.`,
@@ -316,8 +383,7 @@ function startGame3() {
                 if (sequence.length >= memoryLevelTarget) {
                     allowInput = false;
                     info.textContent = 'Идеально!';
-                    reward(240, 'Игра 3 пройдена!');
-                    nextGame(startGame4, 900);
+                    completeGame(3, 240, 'Игра 3');
                     return;
                 }
                 allowInput = false;
@@ -458,12 +524,9 @@ function finishGame4(forceWin = false, showPhoto = false) {
     const passed = forceWin || done >= 4;
     if (passed) {
         if (showPhoto) {
-            score += 230;
-            updateScore();
-            showImagePopupAndRun('photo1.png', () => nextGame(startGame5, 0), 5000);
+            showImagePopupAndRun('photo1.png', () => completeGame(4, 230, 'Игра 4'), 5000);
         } else {
-            reward(230, 'Игра 4 пройдена!');
-            nextGame(startGame5);
+            completeGame(4, 230, 'Игра 4');
         }
     } else {
         showPopupAndRun(
@@ -615,8 +678,7 @@ function finishGame5Rhythm(forceWin = false) {
 
     const passed = forceWin || state.hits >= game5Config.targetHits;
     if (passed) {
-        reward(260, 'Игра 5 пройдена!');
-        nextGame(startGame6);
+        completeGame(5, 260, 'Игра 5');
     } else {
         showPopupAndRun(
             'Игра 5 не пройдена. Поймай 20 попаданий и держи ритм.',
@@ -675,8 +737,7 @@ function startGame6() {
             if (state.input.length === state.order.length) {
                 state.ended = true;
                 info.textContent = 'Маршрут повторен';
-                reward(250, 'Игра 6 пройдена!');
-                nextGame(startGame7, 900);
+                completeGame(6, 250, 'Игра 6');
             }
         };
         grid.appendChild(btn);
@@ -753,8 +814,7 @@ function renderQuizQuestion() {
     if (state.idx >= quizData.length) {
         const passed = state.correct === quizData.length;
         if (passed) {
-            reward(260, 'Игра 7 пройдена идеально!');
-            nextGame(startGame8, 800);
+            completeGame(7, 260, 'Игра 7');
         } else {
             showPopupAndRun(
                 'Игра 7 не пройдена идеально. Нужны все правильные ответы.',
@@ -821,8 +881,7 @@ function startGame8() {
             clearIntervals([spawn, tick]);
             const passed = hits >= target;
             if (passed) {
-                reward(280, 'Игра 8 пройдена!');
-                nextGame(startGame9, 900);
+                completeGame(8, 280, 'Игра 8');
             } else {
                 showPopupAndRun(
                     'Игра 8 не пройдена идеально. Повторяем уровень.',
@@ -988,13 +1047,12 @@ function triggerGame9BonusSequence() {
         if (ackBtn) ackBtn.disabled = true;
 
         createLoveEmojiStorm(2600);
-        reward(320, 'Игра 9 пройдена!');
 
         setTimeout(() => {
             hideGame9LoveOverlay();
             if (ackBtn) ackBtn.disabled = false;
             game9LoveAcknowledgeHandler = null;
-            nextGame(startGame10, 0);
+            completeGame(9, 320, 'Игра 9');
         }, 2600);
     };
 
@@ -1132,8 +1190,7 @@ function pickGame9Card(index) {
         if (state.pairs >= game9PairTarget) {
             state.ended = true;
             if (state.previewTick) clearInterval(state.previewTick);
-            reward(320, 'Игра 9 пройдена!');
-            nextGame(startGame10, 900);
+            completeGame(9, 320, 'Игра 9');
         }
         return;
     }
@@ -1319,8 +1376,7 @@ function throwKnifeGame10() {
     if (state.knivesLeft <= 0) {
         state.ended = true;
         if (state.rafId) cancelAnimationFrame(state.rafId);
-        reward(360, 'Игра 10 пройдена!');
-        nextGame(showMarket, 900);
+        completeGame(10, 360, 'Игра 10');
         return;
     }
 
@@ -1467,7 +1523,8 @@ function playAgain() {
     score = 0;
     updateScore();
     resetFinalButtons();
-    startGame1();
+    completedGames.clear();
+    showGameSelector('Все игры сброшены. Выбери любую игру.');
 }
 
 // ===== Final Buttons =====
@@ -1628,4 +1685,5 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('load', () => {
     createStars();
     updateScore();
+    updateGameSelectorButtons();
 });

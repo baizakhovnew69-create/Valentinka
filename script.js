@@ -1334,9 +1334,16 @@ function pickGame9Card(index) {
 }
 
 // ===== Game 10 =====
-const game10TargetKnives = 12;
+const game10Levels = [
+    { minSpeed: 1.7, maxSpeed: 2.3 },
+    { minSpeed: 2.5, maxSpeed: 3.3 },
+    { minSpeed: 3.4, maxSpeed: 4.4 }
+];
+const game10HitsPerLevel = 10;
 const game10StartLives = 3;
 const game10CollisionAngle = 16;
+const game10HitSpeedGain = 0.14;
+const game10ExtraSpeedCap = 1.6;
 
 function generateGame10Sticks(count, minGap = 34) {
     const result = [];
@@ -1360,10 +1367,13 @@ function startGame10() {
     document.getElementById('game10').style.display = 'block';
 
     gameState.game10 = {
-        wheelAngle: Math.random() * 360,
-        speed: (1.7 + Math.random() * 1.0) * (Math.random() > 0.5 ? 1 : -1),
-        knivesLeft: game10TargetKnives,
+        level: 1,
+        levelHits: 0,
         lives: game10StartLives,
+        wheelAngle: Math.random() * 360,
+        speed: 0,
+        speedDirection: 1,
+        levelMaxSpeed: 0,
         stuckAngles: [],
         ended: false,
         lockThrow: false,
@@ -1379,20 +1389,44 @@ function startGame10() {
         }
     };
 
-    updateGame10Stats();
+    setupGame10Level(1, true);
+    const info = document.getElementById('game10Info');
+    if (info) info.textContent = 'Уровень 1: попади 10 из 10';
+    runGame10Loop();
+}
+
+function setupGame10Level(level, resetLives = true) {
+    const state = gameState.game10;
+    if (!state) return;
+
+    const cfg = game10Levels[Math.max(0, Math.min(game10Levels.length - 1, level - 1))];
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    const baseSpeed = cfg.minSpeed + Math.random() * (cfg.maxSpeed - cfg.minSpeed);
+
+    state.level = level;
+    state.levelHits = 0;
+    state.stuckAngles = [];
+    state.wheelAngle = Math.random() * 360;
+    state.speedDirection = direction;
+    state.speed = baseSpeed * direction;
+    state.levelMaxSpeed = cfg.maxSpeed + game10ExtraSpeedCap;
+    state.lastTs = 0;
+    state.lockThrow = false;
+    if (resetLives) state.lives = game10StartLives;
+
     renderGame10Sticks();
     updateGame10WheelRotation();
-    const info = document.getElementById('game10Info');
-    if (info) info.textContent = 'Поймай ритм колеса и бросай';
-    runGame10Loop();
+    updateGame10Stats();
 }
 
 function updateGame10Stats() {
     const state = gameState.game10;
     if (!state) return;
-    const knivesEl = document.getElementById('game10KnivesLeft');
+    const levelEl = document.getElementById('game10Level');
+    const hitsEl = document.getElementById('game10Hits');
     const livesEl = document.getElementById('game10Lives');
-    if (knivesEl) knivesEl.textContent = String(state.knivesLeft);
+    if (levelEl) levelEl.textContent = String(state.level);
+    if (hitsEl) hitsEl.textContent = String(state.levelHits);
     if (livesEl) livesEl.textContent = String(state.lives);
     updateGame10ReadyKnife();
 }
@@ -1401,7 +1435,7 @@ function updateGame10ReadyKnife() {
     const state = gameState.game10;
     const readyKnife = document.getElementById('game10ReadyKnife');
     if (!readyKnife || !state) return;
-    const visible = !state.ended && state.knivesLeft > 0;
+    const visible = !state.ended && state.levelHits < game10HitsPerLevel;
     readyKnife.classList.toggle('hidden', !visible);
 }
 
@@ -1493,7 +1527,7 @@ function throwKnifeGame10() {
             if (state.rafId) cancelAnimationFrame(state.rafId);
             updateGame10ReadyKnife();
             showPopupAndRun(
-                'Игра 10 проиграна. Перезапускаем уровень.',
+                'Жизни закончились. Начинаем с 1 уровня.',
                 'warn',
                 () => nextGame(startGame10, 0)
             );
@@ -1508,16 +1542,32 @@ function throwKnifeGame10() {
     }
 
     state.stuckAngles.push(impactAngle);
-    state.knivesLeft -= 1;
+    state.levelHits += 1;
+    const absSpeed = Math.min(state.levelMaxSpeed, Math.abs(state.speed) + game10HitSpeedGain);
+    state.speed = absSpeed * state.speedDirection;
     renderGame10Sticks();
     updateGame10Stats();
-    if (info) info.textContent = 'Попадание';
+    if (info) info.textContent = `Попадание: ${state.levelHits}/${game10HitsPerLevel}`;
 
-    if (state.knivesLeft <= 0) {
-        state.ended = true;
-        if (state.rafId) cancelAnimationFrame(state.rafId);
-        updateGame10ReadyKnife();
-        completeGame(10, 360, 'Игра 10');
+    if (state.levelHits >= game10HitsPerLevel) {
+        if (state.level >= game10Levels.length) {
+            state.ended = true;
+            if (state.rafId) cancelAnimationFrame(state.rafId);
+            updateGame10ReadyKnife();
+            completeGame(10, 360, 'Игра 10');
+            return;
+        }
+
+        const nextLevel = state.level + 1;
+        state.lockThrow = true;
+        if (info) info.textContent = `Уровень ${state.level} пройден! Переход к уровню ${nextLevel}...`;
+        setTimeout(() => {
+            const current = gameState.game10;
+            if (!current || current.ended) return;
+            setupGame10Level(nextLevel, true);
+            const infoEl = document.getElementById('game10Info');
+            if (infoEl) infoEl.textContent = `Уровень ${nextLevel}: попади 10 из 10`;
+        }, 640);
         return;
     }
 

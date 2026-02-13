@@ -259,7 +259,8 @@ function startGame2() {
 }
 
 // ===== Game 3 =====
-const memoryEmojis = ['⚡', '🌙', '⭐', '🎵'];
+const memoryEmojis = ['⚡', '🌙', '⭐', '🎵', '💎'];
+const memoryLevelTarget = 10;
 function startGame3() {
     hideAllScreens();
     document.getElementById('game3').style.display = 'block';
@@ -272,6 +273,13 @@ function startGame3() {
     let input = [];
     let level = 0;
     let allowInput = false;
+
+    function renderSequenceDisplay(stepText, symbol = '') {
+        display.innerHTML = `
+            <span class="seq-step">${stepText}</span>
+            <span class="seq-symbol ${symbol ? 'seq-show' : ''}">${symbol || '&nbsp;'}</span>
+        `;
+    }
 
     buttons.innerHTML = '';
     memoryEmojis.forEach((emoji) => {
@@ -294,7 +302,7 @@ function startGame3() {
             }
 
             if (input.length === sequence.length) {
-                if (sequence.length >= 7) {
+                if (sequence.length >= memoryLevelTarget) {
                     allowInput = false;
                     info.textContent = 'Идеально!';
                     reward(240, 'Игра 3 пройдена!');
@@ -311,17 +319,14 @@ function startGame3() {
 
     function showSequence() {
         let i = 0;
-        display.innerHTML = '';
+        renderSequenceDisplay(`Уровень ${level}/${memoryLevelTarget}: запоминай`, '');
         const interval = setInterval(() => {
-            display.innerHTML = `
-                <span class="seq-step">Шаг ${i + 1}</span>
-                <span class="seq-symbol seq-show">${sequence[i]}</span>
-            `;
+            renderSequenceDisplay(`Шаг ${i + 1}/${sequence.length}`, sequence[i]);
             i += 1;
             if (i >= sequence.length) {
                 clearInterval(interval);
                 setTimeout(() => {
-                    display.textContent = 'Повтори последовательность';
+                    renderSequenceDisplay('Повтори последовательность', '');
                     allowInput = true;
                 }, 350);
             }
@@ -332,7 +337,7 @@ function startGame3() {
         level += 1;
         input = [];
         sequence.push(memoryEmojis[Math.floor(Math.random() * memoryEmojis.length)]);
-        info.textContent = `Уровень ${level}`;
+        info.textContent = `Уровень ${level}/${memoryLevelTarget}`;
         showSequence();
     }
 

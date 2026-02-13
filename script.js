@@ -209,9 +209,9 @@ function startGame2() {
     const timerEl = document.getElementById('game2Timer');
     const hitsEl = document.getElementById('game2Hits');
 
-    let timer = 30;
+    let timer = 28;
     let hits = 0;
-    const targetHits = 16;
+    const targetHits = 18;
     timerEl.textContent = String(timer);
     hitsEl.textContent = String(hits);
 
@@ -220,14 +220,14 @@ function startGame2() {
         for (let i = 0; i < 12; i++) {
             const btn = document.createElement('button');
             btn.className = 'target-cell';
-            const good = Math.random() < 0.55;
+            const good = Math.random() < 0.50;
             btn.dataset.good = good ? '1' : '0';
             btn.textContent = good ? '💛' : '🩶';
             btn.onclick = () => {
                 if (btn.dataset.good === '1') {
                     hits += 1;
                 } else {
-                    hits = Math.max(0, hits - 0);
+                    hits = Math.max(0, hits - 1);
                 }
                 hitsEl.textContent = String(hits);
                 renderBoard();
@@ -237,7 +237,7 @@ function startGame2() {
     }
 
     renderBoard();
-    const rerender = setInterval(renderBoard, 1300);
+    const rerender = setInterval(renderBoard, 1200);
     const tick = setInterval(() => {
         timer -= 1;
         timerEl.textContent = String(timer);
@@ -249,7 +249,7 @@ function startGame2() {
                 nextGame(startGame3);
             } else {
                 showPopupAndRun(
-                    'Игра 2 не пройдена идеально. Нужны все условия для перехода дальше.',
+                    `Игра 2 не пройдена. Нужно минимум ${targetHits} попаданий.`,
                     'warn',
                     () => nextGame(startGame2, 0)
                 );

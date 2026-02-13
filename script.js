@@ -947,7 +947,7 @@ function handleYes() {
 
     yesBtn.disabled = true;
     noBtn.disabled = true;
-    response.textContent = 'Ура! Спасибо за победу в испытании 💖';
+    response.textContent = 'Медина, ура! Спасибо, что сказала «да». Я тебя очень сильно люблю 💖';
     document.body.classList.add('hide-all-buttons');
     reward(100, 'Финал');
     createConfetti();

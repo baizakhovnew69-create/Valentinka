@@ -2736,6 +2736,7 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .knife-wheel {
@@ -2779,8 +2780,48 @@ body::after {
     box-shadow: 0 4px 8px rgba(28, 18, 13, 0.2);
 }
 
+.knife-ready-lane {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.knife-ready {
+    width: 10px;
+    height: 70px;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #f7f7f7 0%, #cfd7de 52%, #6f5a4e 53%, #6f5a4e 100%);
+    border: 1px solid rgba(86, 69, 58, 0.45);
+    box-shadow: 0 4px 8px rgba(28, 18, 13, 0.2);
+    transform-origin: 50% 100%;
+    transition: opacity 0.16s ease;
+}
+
+.knife-ready.hidden {
+    opacity: 0;
+}
+
+.knife-ready.throwing {
+    animation: readyKnifeThrow 0.18s ease-out;
+}
+
 .knife-board-fail {
     animation: knifeBoardShake 0.2s linear;
+}
+
+@keyframes readyKnifeThrow {
+    from {
+        transform: translateY(0) scaleY(1);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-72px) scaleY(0.92);
+        opacity: 0.1;
+    }
 }
 
 @keyframes knifeBoardShake {
@@ -2808,6 +2849,11 @@ body::after {
 
     .wheel-knife {
         height: 48px;
+        width: 8px;
+    }
+
+    .knife-ready {
+        height: 58px;
         width: 8px;
     }
 }

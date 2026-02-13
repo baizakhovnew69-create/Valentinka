@@ -1404,6 +1404,27 @@ function updateGame10Stats() {
     const livesEl = document.getElementById('game10Lives');
     if (knivesEl) knivesEl.textContent = String(state.knivesLeft);
     if (livesEl) livesEl.textContent = String(state.lives);
+    updateGame10ReadyKnife();
+}
+
+function updateGame10ReadyKnife() {
+    const state = gameState.game10;
+    const readyKnife = document.getElementById('game10ReadyKnife');
+    if (!readyKnife || !state) return;
+    const visible = !state.ended && state.knivesLeft > 0;
+    readyKnife.classList.toggle('hidden', !visible);
+}
+
+function animateGame10ReadyKnife() {
+    const readyKnife = document.getElementById('game10ReadyKnife');
+    if (!readyKnife || readyKnife.classList.contains('hidden')) return;
+    readyKnife.classList.remove('throwing');
+    void readyKnife.offsetWidth;
+    readyKnife.classList.add('throwing');
+    setTimeout(() => {
+        const node = document.getElementById('game10ReadyKnife');
+        if (node) node.classList.remove('throwing');
+    }, 190);
 }
 
 function updateGame10WheelRotation() {
@@ -1459,6 +1480,7 @@ function throwKnifeGame10() {
     if (!state || state.ended || state.lockThrow) return;
 
     state.lockThrow = true;
+    animateGame10ReadyKnife();
     const impactAngle = normalizeAngle(90 - state.wheelAngle);
     const collision = state.stuckAngles.some((angle) => angularDistance(angle, impactAngle) < game10CollisionAngle);
 
@@ -1479,6 +1501,7 @@ function throwKnifeGame10() {
         if (state.lives <= 0) {
             state.ended = true;
             if (state.rafId) cancelAnimationFrame(state.rafId);
+            updateGame10ReadyKnife();
             showPopupAndRun(
                 'Игра 10 проиграна. Перезапускаем уровень.',
                 'warn',
@@ -1503,6 +1526,7 @@ function throwKnifeGame10() {
     if (state.knivesLeft <= 0) {
         state.ended = true;
         if (state.rafId) cancelAnimationFrame(state.rafId);
+        updateGame10ReadyKnife();
         completeGame(10, 360, 'Игра 10');
         return;
     }

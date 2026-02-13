@@ -1,6 +1,6 @@
 ﻿let score = 0;
 let purchasedPuzzlePieces = new Set();
-const puzzleImageUrl = 'photo2.jpg';
+const specialGiftVideoUrl = 'gift.mp4';
 const puzzleRows = 2;
 const puzzleCols = 4;
 const puzzleCellCount = puzzleRows * puzzleCols;
@@ -108,7 +108,7 @@ function showImagePopupAndRun(imageUrl, action, duration = 5000) {
         overlay.className = 'photo-popup-overlay';
         overlay.innerHTML = `
             <div class="photo-popup-card">
-                <img id="photoPopupImage" alt="Фото" />
+                <img id="photoPopupImage" alt="Нечто особенное" />
             </div>
         `;
         document.body.appendChild(overlay);
@@ -1583,8 +1583,14 @@ function showMarket() {
     document.getElementById('marketContainer').style.display = 'block';
     const oldMessage = document.querySelector('#marketContainer .gift-message');
     if (oldMessage) oldMessage.remove();
+    const marketButtons = document.getElementById('marketButtons');
+    if (marketButtons) marketButtons.style.display = 'block';
     renderPuzzlePreview();
     updateMarketDisplay();
+
+    if (purchasedPuzzlePieces.size === puzzleCellCount) {
+        revealCompletedPuzzle();
+    }
 }
 
 function renderPuzzlePreview() {
@@ -1667,15 +1673,34 @@ function revealCompletedPuzzle() {
     const preview = document.getElementById('puzzlePreview');
     if (!preview) return;
     preview.classList.add('puzzle-preview-complete');
-    preview.innerHTML = `<img class="puzzle-final-photo" src="${puzzleImageUrl}" alt="Открытое фото" />`;
+    preview.innerHTML = `
+        <video class="puzzle-final-special" id="puzzleFinalSpecial" autoplay muted playsinline preload="auto">
+            <source src="${specialGiftVideoUrl}" type="video/mp4" />
+        </video>
+    `;
 
     const message = document.createElement('div');
     message.className = 'gift-message';
-    message.textContent = `Все ${puzzleCellCount} ячеек открыты. Фото показано полностью.`;
+    message.textContent = `Все ${puzzleCellCount} ячеек открыты. Нечто особенное уже здесь.`;
     const exists = document.querySelector('#marketContainer .gift-message');
     if (!exists) {
         document.getElementById('marketContainer').prepend(message);
     }
+
+    const marketButtons = document.getElementById('marketButtons');
+    if (marketButtons) marketButtons.style.display = 'none';
+
+    const specialVideo = document.getElementById('puzzleFinalSpecial');
+    if (!specialVideo) return;
+    specialVideo.currentTime = 0;
+    const playPromise = specialVideo.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+    }
+
+    specialVideo.addEventListener('ended', () => {
+        proceedFromMarket();
+    }, { once: true });
 }
 
 function triggerGlassBreak(piece) {

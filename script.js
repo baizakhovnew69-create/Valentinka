@@ -20,6 +20,7 @@ const gameState = {
 };
 
 const gameIds = ['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9', 'game10'];
+const totalGames = gameIds.length;
 const completedGames = new Set();
 const gameNames = {
     1: 'Игра 1',
@@ -34,7 +35,21 @@ const gameNames = {
     10: 'Игра 10'
 };
 
+function runGameCleanups() {
+    Object.values(gameState).forEach((state) => {
+        if (!state || typeof state.cleanup !== 'function') return;
+        state.cleanup();
+        state.cleanup = null;
+    });
+}
+
+function areAllGamesCompleted() {
+    return completedGames.size >= totalGames;
+}
+
 function hideAllScreens() {
+    runGameCleanups();
+
     document.getElementById('mainContent').style.display = 'none';
     const selector = document.getElementById('gameSelector');
     if (selector) selector.style.display = 'none';
@@ -127,6 +142,15 @@ function updateGameSelectorButtons() {
         const done = completedGames.has(id);
         btn.classList.toggle('done', done);
     });
+
+    const openSecretBtn = document.getElementById('openSecretBtn');
+    if (openSecretBtn) {
+        const left = Math.max(0, totalGames - completedGames.size);
+        openSecretBtn.disabled = left > 0;
+        openSecretBtn.textContent = left > 0
+            ? `Секретный подарок (${left} игр осталось)`
+            : 'Открыть секретный подарок';
+    }
 }
 
 function showGameSelector(message = '') {
@@ -137,6 +161,35 @@ function showGameSelector(message = '') {
     const messageEl = document.getElementById('gameSelectMessage');
     if (messageEl) messageEl.textContent = message;
     updateGameSelectorButtons();
+}
+
+function openSecretGift() {
+    if (!areAllGamesCompleted()) {
+        const left = Math.max(0, totalGames - completedGames.size);
+        showPopup(`Сначала пройди все игры. Осталось: ${left}`, 'warn');
+        return;
+    }
+    showMarket();
+}
+
+function ensureSwitchGameButtons() {
+    gameIds.forEach((id) => {
+        const container = document.getElementById(id);
+        if (!container) return;
+        if (container.querySelector('.switch-game-wrap')) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'switch-game-wrap';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-small switch-game-btn';
+        btn.textContent = 'Выбрать другую игру';
+        btn.onclick = () => showGameSelector('Выбери игру для продолжения');
+
+        wrap.appendChild(btn);
+        container.appendChild(wrap);
+    });
 }
 
 function startSelectedGame(gameNumber) {
@@ -160,12 +213,15 @@ function startSelectedGame(gameNumber) {
 
 function completeGame(gameNumber, points, label = '') {
     const title = label || gameNames[gameNumber] || `Игра ${gameNumber}`;
-    const message = `Поздравляем! ${title} пройдена. Заработано ${points} баллов.`;
 
     completedGames.add(gameNumber);
     score += points;
     updateScore();
     updateGameSelectorButtons();
+    const allDone = areAllGamesCompleted();
+    const message = allDone
+        ? `Поздравляем! ${title} пройдена. Заработано ${points} баллов. Все игры закрыты: можно открыть секретный подарок.`
+        : `Поздравляем! ${title} пройдена. Заработано ${points} баллов.`;
 
     showPopupAndRun(
         `${title} пройдена! +${points} баллов`,
@@ -277,6 +333,13 @@ function startGame1() {
             }
         }
     }, 1000);
+
+    gameState.game1 = {
+        cleanup: () => {
+            ended = true;
+            clearIntervals([spawn, tick]);
+        }
+    };
 }
 
 // ===== Game 2 =====
@@ -334,6 +397,12 @@ function startGame2() {
             }
         }
     }, 1000);
+
+    gameState.game2 = {
+        cleanup: () => {
+            clearIntervals([rerender, tick]);
+        }
+    };
 }
 
 // ===== Game 3 =====
@@ -351,6 +420,8 @@ function startGame3() {
     let input = [];
     let level = 0;
     let allowInput = false;
+    let seqInterval = null;
+    let seqDelay = null;
 
     function renderSequenceDisplay(stepText, symbol = '') {
         display.innerHTML = `
@@ -397,12 +468,13 @@ function startGame3() {
     function showSequence() {
         let i = 0;
         renderSequenceDisplay(`Уровень ${level}/${memoryLevelTarget}: запоминай`, '');
-        const interval = setInterval(() => {
+        seqInterval = setInterval(() => {
             renderSequenceDisplay(`Шаг ${i + 1}/${sequence.length}`, sequence[i]);
             i += 1;
             if (i >= sequence.length) {
-                clearInterval(interval);
-                setTimeout(() => {
+                clearInterval(seqInterval);
+                seqInterval = null;
+                seqDelay = setTimeout(() => {
                     renderSequenceDisplay('Повтори последовательность', '');
                     allowInput = true;
                 }, 350);
@@ -419,6 +491,14 @@ function startGame3() {
     }
 
     nextRound();
+
+    gameState.game3 = {
+        cleanup: () => {
+            allowInput = false;
+            if (seqInterval) clearInterval(seqInterval);
+            if (seqDelay) clearTimeout(seqDelay);
+        }
+    };
 }
 
 // ===== Game 4 =====
@@ -453,7 +533,13 @@ function startGame4() {
         done,
         active: 0,
         ended: false,
-        phraseTime: 60
+        phraseTime: 60,
+        cleanup: () => {
+            const current = gameState.game4;
+            if (!current) return;
+            current.ended = true;
+            clearIntervals([current.tick]);
+        }
     };
 
     inputEl.value = '';
@@ -565,7 +651,14 @@ function startGame5() {
         ended: false,
         tick: null,
         rafId: null,
-        lastTs: 0
+        lastTs: 0,
+        cleanup: () => {
+            const current = gameState.game5;
+            if (!current) return;
+            current.ended = true;
+            clearIntervals([current.tick]);
+            if (current.rafId) cancelAnimationFrame(current.rafId);
+        }
     };
 
     updateGame5RhythmStats();
@@ -708,7 +801,14 @@ function startGame6() {
         input: [],
         ended: false,
         unlocked: false,
-        replaying: false
+        replaying: false,
+        cleanup: () => {
+            const current = gameState.game6;
+            if (!current) return;
+            current.ended = true;
+            current.unlocked = false;
+            current.replaying = false;
+        }
     };
 
     grid.innerHTML = '';
@@ -801,7 +901,7 @@ function startGame7() {
     hideAllScreens();
     document.getElementById('game7').style.display = 'block';
 
-    gameState.game7 = { idx: 0, correct: 0 };
+    gameState.game7 = { idx: 0, correct: 0, cleanup: () => {} };
     renderQuizQuestion();
 }
 
@@ -891,6 +991,12 @@ function startGame8() {
             }
         }
     }, 1000);
+
+    gameState.game8 = {
+        cleanup: () => {
+            clearIntervals([spawn, tick]);
+        }
+    };
 }
 
 // ===== Shared Helpers =====
@@ -1031,10 +1137,12 @@ function triggerGame9BonusSequence() {
     if (!state || state.ended || state.bonusActivated) return;
 
     state.bonusActivated = true;
-    state.ended = true;
     state.locked = true;
-    if (state.previewTick) clearInterval(state.previewTick);
-    if (state.flipBackTimeout) clearTimeout(state.flipBackTimeout);
+    state.firstPick = -1;
+    if (state.flipBackTimeout) {
+        clearTimeout(state.flipBackTimeout);
+        state.flipBackTimeout = null;
+    }
 
     if (info) info.textContent = 'Секретная записка для Медины';
     renderGame9Grid();
@@ -1052,7 +1160,11 @@ function triggerGame9BonusSequence() {
             hideGame9LoveOverlay();
             if (ackBtn) ackBtn.disabled = false;
             game9LoveAcknowledgeHandler = null;
-            completeGame(9, 320, 'Игра 9');
+            const current = gameState.game9;
+            if (!current || current.ended) return;
+            current.locked = false;
+            if (info) info.textContent = 'Секрет открыт. Продолжай искать пары.';
+            renderGame9Grid();
         }, 2600);
     };
 
@@ -1084,7 +1196,15 @@ function startGame9() {
         ended: false,
         bonusActivated: false,
         previewTick: null,
-        flipBackTimeout: null
+        flipBackTimeout: null,
+        cleanup: () => {
+            const current = gameState.game9;
+            if (!current) return;
+            current.ended = true;
+            current.locked = true;
+            if (current.previewTick) clearInterval(current.previewTick);
+            if (current.flipBackTimeout) clearTimeout(current.flipBackTimeout);
+        }
     };
 
     updateGame9Stats();
@@ -1254,12 +1374,19 @@ function startGame10() {
         speed: (1.7 + Math.random() * 1.0) * (Math.random() > 0.5 ? 1 : -1),
         knivesLeft: game10TargetKnives,
         lives: game10StartLives,
-        stuckAngles: generateGame10Sticks(3),
+        stuckAngles: [],
         ended: false,
         lockThrow: false,
         rafId: null,
         lastTs: 0,
-        failTimeout: null
+        failTimeout: null,
+        cleanup: () => {
+            const current = gameState.game10;
+            if (!current) return;
+            current.ended = true;
+            if (current.rafId) cancelAnimationFrame(current.rafId);
+            if (current.failTimeout) clearTimeout(current.failTimeout);
+        }
     };
 
     updateGame10Stats();
@@ -1314,7 +1441,7 @@ function runGame10Loop() {
         if (!state.lastTs) state.lastTs = ts;
         const dt = Math.min(36, ts - state.lastTs);
         state.lastTs = ts;
-        state.wheelAngle = normalizeAngle(state.wheelAngle + state.speed * (dt / 16.666));
+        state.wheelAngle += state.speed * (dt / 16.666);
         updateGame10WheelRotation();
 
         state.rafId = requestAnimationFrame(tick);
@@ -1685,5 +1812,6 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('load', () => {
     createStars();
     updateScore();
+    ensureSwitchGameButtons();
     updateGameSelectorButtons();
 });

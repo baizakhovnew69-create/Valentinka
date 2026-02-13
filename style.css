@@ -2748,7 +2748,6 @@ body::after {
         linear-gradient(145deg, #a37f6b, #7d6354);
     border: 2px solid rgba(138, 101, 82, 0.36);
     box-shadow: inset 0 -16px 24px rgba(61, 36, 23, 0.2), 0 16px 24px rgba(53, 31, 22, 0.2);
-    transition: transform 0.08s linear;
 }
 
 .knife-core {
@@ -3104,6 +3103,27 @@ body::after {
     min-height: 32px;
 }
 
+.game-select-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.game-select-final-btn:disabled {
+    opacity: 0.62;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.switch-game-wrap {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.switch-game-btn {
+    min-width: 220px;
+}
+
 @media (max-width: 768px) {
     .game-selector .game-select-grid {
         grid-template-columns: 1fr;
@@ -3113,6 +3133,10 @@ body::after {
     .game-select-btn {
         min-height: 48px;
         font-size: 0.88rem;
+    }
+
+    .switch-game-btn {
+        min-width: 100%;
     }
 }
 

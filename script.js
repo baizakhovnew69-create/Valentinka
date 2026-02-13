@@ -1681,7 +1681,7 @@ function revealCompletedPuzzle() {
     if (!preview) return;
     preview.classList.add('puzzle-preview-complete');
     preview.innerHTML = `
-        <video class="puzzle-final-special" id="puzzleFinalSpecial" autoplay muted playsinline preload="auto">
+        <video class="puzzle-final-special" id="puzzleFinalSpecial" autoplay playsinline preload="auto">
             <source src="${specialGiftVideoUrl}" type="video/mp4" />
         </video>
     `;
@@ -1700,9 +1700,20 @@ function revealCompletedPuzzle() {
     const specialVideo = document.getElementById('puzzleFinalSpecial');
     if (!specialVideo) return;
     specialVideo.currentTime = 0;
+    specialVideo.muted = false;
+    specialVideo.volume = 1;
+    specialVideo.defaultMuted = false;
+
     const playPromise = specialVideo.play();
     if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {});
+        playPromise.catch(() => {
+            showPopup('Нажми на видео один раз, чтобы включился звук', 'info', 1700);
+            specialVideo.addEventListener('click', () => {
+                specialVideo.muted = false;
+                specialVideo.volume = 1;
+                specialVideo.play().catch(() => {});
+            }, { once: true });
+        });
     }
 
     specialVideo.addEventListener('ended', () => {

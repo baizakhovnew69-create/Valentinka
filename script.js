@@ -430,10 +430,17 @@ function startGame3() {
     let seqInterval = null;
     let seqDelay = null;
 
-    function renderSequenceDisplay(stepText, symbol = '') {
+    function renderSequenceDisplay(stepText, symbol = '', entered = [], total = sequence.length) {
+        const safeTotal = Math.max(0, total);
+        const progress = Array.from({ length: safeTotal }, (_, idx) => {
+            const value = entered[idx] || '';
+            return `<span class="seq-input-item ${value ? 'filled' : ''}">${value || '·'}</span>`;
+        }).join('');
+
         display.innerHTML = `
             <span class="seq-step">${stepText}</span>
             <span class="seq-symbol ${symbol ? 'seq-show' : ''}">${symbol || '&nbsp;'}</span>
+            <span class="seq-input">${progress}</span>
         `;
     }
 
@@ -445,10 +452,12 @@ function startGame3() {
         btn.onclick = () => {
             if (!allowInput) return;
             input.push(emoji);
+            renderSequenceDisplay(`Повтори последовательность ${input.length}/${sequence.length}`, '', input, sequence.length);
             const idx = input.length - 1;
             if (input[idx] !== sequence[idx]) {
                 allowInput = false;
                 info.textContent = `Ошибка на уровне ${level}`;
+                renderSequenceDisplay(`Ошибка на уровне ${level}`, '', input, sequence.length);
                 showPopupAndRun(
                     'Игра 3 не пройдена идеально. Повторяем уровень.',
                     'warn',
@@ -461,6 +470,7 @@ function startGame3() {
                 if (sequence.length >= memoryLevelTarget) {
                     allowInput = false;
                     info.textContent = 'Идеально!';
+                    renderSequenceDisplay('Идеально!', '', input, sequence.length);
                     completeGame(3, 240, 'Игра 3');
                     return;
                 }
@@ -474,15 +484,15 @@ function startGame3() {
 
     function showSequence() {
         let i = 0;
-        renderSequenceDisplay(`Уровень ${level}/${memoryLevelTarget}: запоминай`, '');
+        renderSequenceDisplay(`Уровень ${level}/${memoryLevelTarget}: запоминай`, '', [], sequence.length);
         seqInterval = setInterval(() => {
-            renderSequenceDisplay(`Шаг ${i + 1}/${sequence.length}`, sequence[i]);
+            renderSequenceDisplay(`Шаг ${i + 1}/${sequence.length}`, sequence[i], [], sequence.length);
             i += 1;
             if (i >= sequence.length) {
                 clearInterval(seqInterval);
                 seqInterval = null;
                 seqDelay = setTimeout(() => {
-                    renderSequenceDisplay('Повтори последовательность', '');
+                    renderSequenceDisplay('Повтори последовательность', '', [], sequence.length);
                     allowInput = true;
                 }, 350);
             }

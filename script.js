@@ -136,7 +136,7 @@ function startGames() {
 }
 
 function updateGameSelectorButtons() {
-    const buttons = document.querySelectorAll('.game-select-btn[data-game-id]');
+    const buttons = document.querySelectorAll('.game-select-card[data-game-id]');
     buttons.forEach((btn) => {
         const id = Number(btn.dataset.gameId);
         const done = completedGames.has(id);

@@ -30,16 +30,168 @@
             <h2 class="game-title">Выбери любую игру</h2>
             <p class="game-description">Игры проходятся в любом порядке. После победы ты вернешься сюда.</p>
             <div class="game-select-grid">
-                <button class="game-select-btn" data-game-id="1" onclick="startSelectedGame(1)">1. Ливень сердец</button>
-                <button class="game-select-btn" data-game-id="2" onclick="startSelectedGame(2)">2. Точный выбор</button>
-                <button class="game-select-btn" data-game-id="3" onclick="startSelectedGame(3)">3. Память цепочки</button>
-                <button class="game-select-btn" data-game-id="4" onclick="startSelectedGame(4)">4. Печатай быстро</button>
-                <button class="game-select-btn" data-game-id="5" onclick="startSelectedGame(5)">5. Ритм сердца</button>
-                <button class="game-select-btn" data-game-id="6" onclick="startSelectedGame(6)">6. Маршрут памяти</button>
-                <button class="game-select-btn" data-game-id="7" onclick="startSelectedGame(7)">7. Сложный квиз</button>
-                <button class="game-select-btn" data-game-id="8" onclick="startSelectedGame(8)">8. Рывок на реакцию</button>
-                <button class="game-select-btn" data-game-id="9" onclick="startSelectedGame(9)">9. Логика 5x5</button>
-                <button class="game-select-btn" data-game-id="10" onclick="startSelectedGame(10)">10. Knife Hit</button>
+                <button class="game-select-card" data-game-id="1" onclick="startSelectedGame(1)" style="--card-a:#f06755; --card-b:#f5b57c;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <path d="M30 20c0-6 5-10 10-10s10 4 10 10c0 11-10 15-10 15s-10-4-10-15z" fill="#fff2ec"/>
+                            <path d="M68 30c0-4 3-7 7-7s7 3 7 7c0 8-7 11-7 11s-7-3-7-11z" fill="#ffe4d8"/>
+                            <path d="M18 46c0-3 2-5 5-5s5 2 5 5c0 5-5 7-5 7s-5-2-5-7z" fill="#ffd8c7"/>
+                            <line x1="24" y1="58" x2="96" y2="58" stroke="#fff5ef" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 1</span>
+                        <span class="game-card-title">Ливень сердец</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="2" onclick="startSelectedGame(2)" style="--card-a:#c58c38; --card-b:#f1cc78;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <circle cx="60" cy="36" r="20" fill="none" stroke="#fff6e8" stroke-width="3"/>
+                            <circle cx="60" cy="36" r="12" fill="none" stroke="#fff1d8" stroke-width="3"/>
+                            <circle cx="60" cy="36" r="5" fill="#fff6e8"/>
+                            <line x1="16" y1="12" x2="32" y2="24" stroke="#fff3dd" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="104" y1="60" x2="88" y2="48" stroke="#fff3dd" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 2</span>
+                        <span class="game-card-title">Точный выбор</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="3" onclick="startSelectedGame(3)" style="--card-a:#6c7fa8; --card-b:#a4b3d3;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <circle cx="24" cy="36" r="7" fill="#eef3ff"/>
+                            <circle cx="48" cy="20" r="7" fill="#eef3ff"/>
+                            <circle cx="72" cy="52" r="7" fill="#eef3ff"/>
+                            <circle cx="96" cy="30" r="7" fill="#eef3ff"/>
+                            <polyline points="24,36 48,20 72,52 96,30" fill="none" stroke="#dfe7ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 3</span>
+                        <span class="game-card-title">Память цепочки</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="4" onclick="startSelectedGame(4)" style="--card-a:#4d8b87; --card-b:#8bc0b8;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <rect x="20" y="18" width="80" height="36" rx="8" fill="#eefcf8"/>
+                            <rect x="26" y="24" width="12" height="8" rx="2" fill="#cdebe2"/>
+                            <rect x="42" y="24" width="12" height="8" rx="2" fill="#cdebe2"/>
+                            <rect x="58" y="24" width="12" height="8" rx="2" fill="#cdebe2"/>
+                            <rect x="74" y="24" width="20" height="8" rx="2" fill="#cdebe2"/>
+                            <rect x="26" y="36" width="32" height="8" rx="2" fill="#cdebe2"/>
+                            <rect x="62" y="36" width="32" height="8" rx="2" fill="#cdebe2"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 4</span>
+                        <span class="game-card-title">Печатай быстро</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="5" onclick="startSelectedGame(5)" style="--card-a:#b74b4f; --card-b:#e2868a;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <polyline points="10,40 24,40 32,26 44,52 56,22 68,46 80,34 94,34 110,34" fill="none" stroke="#ffeef0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="60" cy="36" r="30" fill="none" stroke="#ffd8de" stroke-width="2" opacity="0.4"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 5</span>
+                        <span class="game-card-title">Ритм сердца</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="6" onclick="startSelectedGame(6)" style="--card-a:#4f709a; --card-b:#9db7da;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <g stroke="#ebf3ff" stroke-width="2">
+                                <path d="M20 16h80M20 30h80M20 44h80M20 58h80"/>
+                                <path d="M20 16v42M40 16v42M60 16v42M80 16v42M100 16v42"/>
+                            </g>
+                            <polyline points="30,52 30,24 50,24 50,38 70,38 70,24 90,24" fill="none" stroke="#fff7d1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 6</span>
+                        <span class="game-card-title">Маршрут памяти</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="7" onclick="startSelectedGame(7)" style="--card-a:#856187; --card-b:#bc9ac0;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <rect x="18" y="16" width="84" height="40" rx="10" fill="#f7ecfa"/>
+                            <circle cx="44" cy="36" r="6" fill="#d8c1dd"/>
+                            <circle cx="60" cy="36" r="6" fill="#d8c1dd"/>
+                            <circle cx="76" cy="36" r="6" fill="#d8c1dd"/>
+                            <path d="M58 22c0-3 2-5 5-5s5 2 5 5c0 4-5 5-5 8" fill="none" stroke="#8a6a8e" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="63" cy="48" r="1.8" fill="#8a6a8e"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 7</span>
+                        <span class="game-card-title">Сложный квиз</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="8" onclick="startSelectedGame(8)" style="--card-a:#6f5c47; --card-b:#bc9a7f;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <circle cx="60" cy="36" r="18" fill="none" stroke="#f9efe5" stroke-width="3"/>
+                            <circle cx="60" cy="36" r="10" fill="none" stroke="#f9efe5" stroke-width="3"/>
+                            <circle cx="60" cy="36" r="3.5" fill="#f9efe5"/>
+                            <line x1="60" y1="8" x2="60" y2="22" stroke="#f9efe5" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="60" y1="50" x2="60" y2="64" stroke="#f9efe5" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="32" y1="36" x2="18" y2="36" stroke="#f9efe5" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="88" y1="36" x2="102" y2="36" stroke="#f9efe5" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 8</span>
+                        <span class="game-card-title">Рывок на реакцию</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="9" onclick="startSelectedGame(9)" style="--card-a:#4b8763; --card-b:#9fcca6;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <rect x="24" y="16" width="20" height="16" rx="3" fill="#edf8ef"/>
+                            <rect x="50" y="16" width="20" height="16" rx="3" fill="#edf8ef"/>
+                            <rect x="76" y="16" width="20" height="16" rx="3" fill="#edf8ef"/>
+                            <rect x="24" y="36" width="20" height="16" rx="3" fill="#d7ebdb"/>
+                            <rect x="50" y="36" width="20" height="16" rx="3" fill="#edf8ef"/>
+                            <rect x="76" y="36" width="20" height="16" rx="3" fill="#d7ebdb"/>
+                            <path d="M50 58l10-10 10 10" fill="none" stroke="#f8f3cb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 9</span>
+                        <span class="game-card-title">Логика 5x5</span>
+                    </span>
+                </button>
+
+                <button class="game-select-card" data-game-id="10" onclick="startSelectedGame(10)" style="--card-a:#6a6f86; --card-b:#b6bddc;">
+                    <span class="game-card-svg" aria-hidden="true">
+                        <svg viewBox="0 0 120 72">
+                            <circle cx="64" cy="36" r="18" fill="none" stroke="#eef1ff" stroke-width="3"/>
+                            <circle cx="64" cy="36" r="7" fill="none" stroke="#eef1ff" stroke-width="3"/>
+                            <rect x="22" y="48" width="8" height="20" rx="4" fill="#f2f5ff"/>
+                            <rect x="22" y="48" width="8" height="11" rx="4" fill="#d5daef"/>
+                            <line x1="78" y1="22" x2="92" y2="12" stroke="#f2f5ff" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="game-card-meta">
+                        <span class="game-card-num">Игра 10</span>
+                        <span class="game-card-title">Knife Hit</span>
+                    </span>
+                </button>
             </div>
             <div class="game-select-actions">
                 <button class="btn-next-market game-select-final-btn" id="openSecretBtn" onclick="openSecretGift()" disabled>Секретный подарок (10 игр осталось)</button>

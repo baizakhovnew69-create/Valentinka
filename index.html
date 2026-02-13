@@ -69,16 +69,21 @@
         </div>
 
         <div class="game-container" id="game5" style="display:none;">
-            <h2 class="game-title">Игра 5: Математический спринт</h2>
-            <p class="game-description">Реши 10 примеров. Нужна скорость и точность.</p>
-            <div class="quiz-question" id="mathQuestion"></div>
-            <input class="number-input" id="mathAnswer" type="number" placeholder="Ответ" autocomplete="off">
-            <button class="btn btn-small" onclick="submitMathAnswer()">Ответить</button>
-            <div class="game-stats">
-                <span>Время: <span id="mathTimer">90</span>s</span>
-                <span>Решено: <span id="mathProgress">0</span>/10</span>
+            <h2 class="game-title">Игра 5: Ритм сердца</h2>
+            <p class="game-description">Лови ритм: жми в момент, когда маркер в золотой зоне.</p>
+            <div class="rhythm-panel">
+                <div class="rhythm-track" id="rhythmTrack">
+                    <div class="rhythm-zone" id="rhythmZone"></div>
+                    <div class="rhythm-marker" id="rhythmMarker"></div>
+                </div>
+                <button class="btn btn-small" onclick="catchRhythmBeat()">Поймать ритм</button>
             </div>
-            <div id="mathInfo" class="game-result"></div>
+            <div class="game-stats">
+                <span>Время: <span id="rhythmTimer">45</span>s</span>
+                <span>Попаданий: <span id="rhythmHits">0</span>/20</span>
+                <span>Промахов: <span id="rhythmMisses">0</span>/5</span>
+            </div>
+            <div id="rhythmInfo" class="game-result"></div>
         </div>
 
         <div class="game-container" id="game6" style="display:none;">

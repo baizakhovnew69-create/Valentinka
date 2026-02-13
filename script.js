@@ -475,95 +475,151 @@ function finishGame4(forceWin = false, showPhoto = false) {
 }
 
 // ===== Game 5 =====
-function createMathTask() {
-    const a = 8 + Math.floor(Math.random() * 24);
-    const b = 3 + Math.floor(Math.random() * 12);
-    const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
-    let answer = 0;
-    if (op === '+') answer = a + b;
-    if (op === '-') answer = a - b;
-    if (op === '*') answer = a * b;
-    return { text: `${a} ${op} ${b}`, answer };
-}
+const game5Config = {
+    duration: 45,
+    targetHits: 20,
+    maxMisses: 5,
+    zoneMin: 43,
+    zoneMax: 57
+};
 
 function startGame5() {
+    const prev = gameState.game5;
+    if (prev && prev.tick) clearInterval(prev.tick);
+    if (prev && prev.rafId) cancelAnimationFrame(prev.rafId);
+
     hideAllScreens();
     document.getElementById('game5').style.display = 'block';
 
-    const questionEl = document.getElementById('mathQuestion');
-    const answerEl = document.getElementById('mathAnswer');
-    const timerEl = document.getElementById('mathTimer');
-    const progressEl = document.getElementById('mathProgress');
-    const info = document.getElementById('mathInfo');
-
-    let timer = 45;
     gameState.game5 = {
-        solved: 0,
-        correct: 0,
-        current: createMathTask(),
-        ended: false
+        timeLeft: game5Config.duration,
+        hits: 0,
+        misses: 0,
+        markerPercent: 50,
+        motion: Math.random() * Math.PI * 2,
+        speed: 3.2 + Math.random() * 0.8,
+        lockUntil: 0,
+        ended: false,
+        tick: null,
+        rafId: null,
+        lastTs: 0
     };
 
-    questionEl.textContent = gameState.game5.current.text;
-    progressEl.textContent = '0';
-    timerEl.textContent = String(timer);
-    info.textContent = '';
-    answerEl.value = '';
-    answerEl.focus();
+    updateGame5RhythmStats();
+    const info = document.getElementById('rhythmInfo');
+    if (info) info.textContent = 'Нажимай, когда маркер попадает в золотую зону';
+
+    renderGame5RhythmMarker();
+    runGame5RhythmLoop();
 
     gameState.game5.tick = setInterval(() => {
-        timer -= 1;
-        timerEl.textContent = String(timer);
-        if (timer <= 0) {
-            finishGame5();
+        const state = gameState.game5;
+        if (!state || state.ended) return;
+
+        state.timeLeft -= 1;
+        updateGame5RhythmStats();
+        if (state.timeLeft <= 0) {
+            finishGame5Rhythm(false);
         }
     }, 1000);
 }
 
-function submitMathAnswer() {
+function updateGame5RhythmStats() {
+    const state = gameState.game5;
+    if (!state) return;
+
+    const timerEl = document.getElementById('rhythmTimer');
+    const hitsEl = document.getElementById('rhythmHits');
+    const missesEl = document.getElementById('rhythmMisses');
+    if (timerEl) timerEl.textContent = String(Math.max(0, state.timeLeft));
+    if (hitsEl) hitsEl.textContent = String(state.hits);
+    if (missesEl) missesEl.textContent = String(state.misses);
+}
+
+function renderGame5RhythmMarker() {
+    const state = gameState.game5;
+    const marker = document.getElementById('rhythmMarker');
+    if (!state || !marker) return;
+    marker.style.left = `${state.markerPercent}%`;
+}
+
+function runGame5RhythmLoop() {
+    const tick = (ts) => {
+        const state = gameState.game5;
+        if (!state || state.ended) return;
+
+        if (!state.lastTs) state.lastTs = ts;
+        const dt = Math.min(36, ts - state.lastTs);
+        state.lastTs = ts;
+
+        state.motion += state.speed * (dt / 1000);
+        state.markerPercent = 50 + Math.sin(state.motion) * 46;
+
+        // Mild speed drift so rhythm is alive, but still readable.
+        state.speed += Math.sin(ts / 1400) * 0.0006;
+        state.speed = Math.max(2.7, Math.min(4.7, state.speed));
+
+        renderGame5RhythmMarker();
+        state.rafId = requestAnimationFrame(tick);
+    };
+
     const state = gameState.game5;
     if (!state || state.ended) return;
+    state.rafId = requestAnimationFrame(tick);
+}
 
-    const answerEl = document.getElementById('mathAnswer');
-    const progressEl = document.getElementById('mathProgress');
-    const questionEl = document.getElementById('mathQuestion');
-    const info = document.getElementById('mathInfo');
+function catchRhythmBeat() {
+    const state = gameState.game5;
+    const info = document.getElementById('rhythmInfo');
+    const track = document.getElementById('rhythmTrack');
+    if (!state || state.ended) return;
 
-    const value = Number(answerEl.value);
-    state.solved += 1;
-    if (value === state.current.answer) {
-        state.correct += 1;
-        info.textContent = 'Верно';
-    } else {
-        info.textContent = `Неверно, было ${state.current.answer}`;
-    }
+    const now = performance.now();
+    if (now < state.lockUntil) return;
+    state.lockUntil = now + 170;
 
-    progressEl.textContent = String(state.solved);
-
-    if (state.solved >= 10) {
-        finishGame5();
+    const hit = state.markerPercent >= game5Config.zoneMin && state.markerPercent <= game5Config.zoneMax;
+    if (hit) {
+        state.hits += 1;
+        if (info) info.textContent = `Точно! ${state.hits}/${game5Config.targetHits}`;
+        if (track) {
+            track.classList.add('rhythm-hit');
+            setTimeout(() => track.classList.remove('rhythm-hit'), 140);
+        }
+        updateGame5RhythmStats();
+        if (state.hits >= game5Config.targetHits) {
+            finishGame5Rhythm(true);
+        }
         return;
     }
 
-    state.current = createMathTask();
-    questionEl.textContent = state.current.text;
-    answerEl.value = '';
-    answerEl.focus();
+    state.misses += 1;
+    if (info) info.textContent = `Мимо. Осталось ошибок: ${Math.max(0, game5Config.maxMisses - state.misses)}`;
+    if (track) {
+        track.classList.add('rhythm-miss');
+        setTimeout(() => track.classList.remove('rhythm-miss'), 160);
+    }
+    updateGame5RhythmStats();
+    if (state.misses >= game5Config.maxMisses) {
+        finishGame5Rhythm(false);
+    }
 }
 
-function finishGame5() {
+function finishGame5Rhythm(forceWin = false) {
     const state = gameState.game5;
     if (!state || state.ended) return;
     state.ended = true;
-    clearIntervals([state.tick]);
 
-    const passed = state.solved === 10 && state.correct === 10;
+    clearIntervals([state.tick]);
+    if (state.rafId) cancelAnimationFrame(state.rafId);
+
+    const passed = forceWin || state.hits >= game5Config.targetHits;
     if (passed) {
-        reward(260, 'Игра 5 пройдена идеально!');
+        reward(260, 'Игра 5 пройдена!');
         nextGame(startGame6);
     } else {
         showPopupAndRun(
-            'Игра 5 не пройдена идеально. Нужно 10/10 правильных.',
+            'Игра 5 не пройдена. Поймай 20 попаданий и держи ритм.',
             'warn',
             () => nextGame(startGame5, 0)
         );

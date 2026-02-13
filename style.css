@@ -2983,6 +2983,82 @@ body::after {
     }
 }
 
+/* ===== GAME 5 RHYTHM ===== */
+.rhythm-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+}
+
+.rhythm-track {
+    width: 100%;
+    max-width: 520px;
+    height: 58px;
+    border-radius: 999px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(138, 101, 82, 0.3);
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.88)),
+        repeating-linear-gradient(
+            90deg,
+            rgba(138, 101, 82, 0.12) 0px,
+            rgba(138, 101, 82, 0.12) 6px,
+            transparent 6px,
+            transparent 16px
+        );
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.rhythm-zone {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 43%;
+    width: 14%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 217, 117, 0.86), rgba(195, 146, 47, 0.78));
+    box-shadow: 0 0 12px rgba(195, 146, 47, 0.32);
+}
+
+.rhythm-marker {
+    position: absolute;
+    top: 4px;
+    width: 12px;
+    height: 50px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #ff7360, #b04b3d);
+    box-shadow: 0 0 8px rgba(176, 75, 61, 0.35);
+    transform: translateX(-50%);
+}
+
+.rhythm-track.rhythm-hit {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 0 0 4px rgba(61, 125, 102, 0.2);
+}
+
+.rhythm-track.rhythm-miss {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 0 0 4px rgba(176, 75, 61, 0.2);
+}
+
+@media (max-width: 768px) {
+    .rhythm-track {
+        height: 50px;
+    }
+
+    .rhythm-zone {
+        top: 6px;
+        bottom: 6px;
+    }
+
+    .rhythm-marker {
+        top: 4px;
+        height: 42px;
+        width: 10px;
+    }
+}
+
 body.hide-all-buttons button {
     opacity: 0 !important;
     visibility: hidden !important;

@@ -1345,15 +1345,15 @@ function pickGame9Card(index) {
 
 // ===== Game 10 =====
 const game10Levels = [
-    { minSpeed: 1.7, maxSpeed: 2.3 },
-    { minSpeed: 2.5, maxSpeed: 3.3 },
-    { minSpeed: 3.4, maxSpeed: 4.4 }
+    { minSpeed: 1.45, maxSpeed: 1.95 },
+    { minSpeed: 2.0, maxSpeed: 2.75 },
+    { minSpeed: 2.7, maxSpeed: 3.55 }
 ];
 const game10HitsPerLevel = 10;
 const game10StartLives = 3;
-const game10CollisionAngle = 16;
-const game10HitSpeedGain = 0.14;
-const game10ExtraSpeedCap = 1.6;
+const game10CollisionAngle = 13;
+const game10HitSpeedGain = 0.1;
+const game10ExtraSpeedCap = 1.2;
 
 function generateGame10Sticks(count, minGap = 34) {
     const result = [];

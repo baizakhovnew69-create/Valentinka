@@ -3240,12 +3240,18 @@ body::after {
     margin-top: 12px;
     display: flex;
     justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .game-select-final-btn:disabled {
     opacity: 0.62;
     cursor: not-allowed;
     box-shadow: none;
+}
+
+.game-select-test-btn {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
 }
 
 .switch-game-wrap {

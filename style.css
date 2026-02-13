@@ -2675,6 +2675,144 @@ body::after {
     }
 }
 
+/* ===== GAME 9 LOGIC GRID ===== */
+#game9 .game-stats {
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.logic-grid {
+    width: 100%;
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(52px, 1fr));
+    gap: 10px;
+}
+
+.logic-card {
+    min-height: 64px;
+    border-radius: 12px;
+    border: 1px solid rgba(138, 101, 82, 0.3);
+    background: rgba(255, 255, 255, 0.82);
+    color: rgba(44, 32, 25, 0.45);
+    font-size: 1.45rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.logic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 14px rgba(109, 75, 56, 0.16);
+}
+
+.logic-card.is-open {
+    color: #2c2019;
+    background: rgba(255, 255, 255, 0.94);
+}
+
+.logic-card.is-matched {
+    background: linear-gradient(145deg, #d9b88f, #bd996e);
+    color: #fff8ef;
+    border-color: rgba(195, 146, 47, 0.6);
+}
+
+.logic-card.is-bonus.is-open {
+    background: linear-gradient(145deg, #4d9d82, #3d7d66);
+    color: #f5fffb;
+    border-color: rgba(61, 125, 102, 0.6);
+}
+
+.logic-card:disabled {
+    cursor: default;
+}
+
+/* ===== GAME 10 KNIFE HIT ===== */
+.knife-board {
+    width: min(360px, 100%);
+    aspect-ratio: 1 / 1;
+    margin: 12px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.knife-wheel {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    position: relative;
+    background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(145deg, #a37f6b, #7d6354);
+    border: 2px solid rgba(138, 101, 82, 0.36);
+    box-shadow: inset 0 -16px 24px rgba(61, 36, 23, 0.2), 0 16px 24px rgba(53, 31, 22, 0.2);
+    transition: transform 0.08s linear;
+}
+
+.knife-core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 42px;
+    height: 42px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: linear-gradient(145deg, #f2e0cf, #c6a98f);
+    border: 1px solid rgba(101, 72, 57, 0.45);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.38);
+}
+
+.knife-sticks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.wheel-knife {
+    position: absolute;
+    width: 9px;
+    height: 54px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #f7f7f7 0%, #cfd7de 52%, #6f5a4e 53%, #6f5a4e 100%);
+    border: 1px solid rgba(86, 69, 58, 0.45);
+    box-shadow: 0 4px 8px rgba(28, 18, 13, 0.2);
+}
+
+.knife-board-fail {
+    animation: knifeBoardShake 0.2s linear;
+}
+
+@keyframes knifeBoardShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
+}
+
+@media (max-width: 768px) {
+    .logic-grid {
+        gap: 8px;
+    }
+
+    .logic-card {
+        min-height: 54px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+    }
+
+    .knife-wheel {
+        width: 218px;
+        height: 218px;
+    }
+
+    .wheel-knife {
+        height: 48px;
+        width: 8px;
+    }
+}
+
 body.hide-all-buttons button {
     opacity: 0 !important;
     visibility: hidden !important;

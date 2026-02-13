@@ -21,7 +21,7 @@
 
         <div class="content-wrapper" id="mainContent">
             <h1 class="title">Медина, это для тебя</h1>
-            <p class="subtitle">8 сложных игр. Собери достаточно баллов и открой чудо только для тебя, Медина.</p>
+            <p class="subtitle">10 сложных игр. Собери достаточно баллов и открой чудо только для тебя, Медина.</p>
             <button class="btn btn-primary" onclick="startGames()" id="startBtn">Начать испытание</button>
             <div id="introResponse" class="response"></div>
         </div>
@@ -99,13 +99,44 @@
         </div>
 
         <div class="game-container" id="game8" style="display:none;">
-            <h2 class="game-title">Игра 8: Финальный рывок</h2>
+            <h2 class="game-title">Игра 8: Рывок на реакцию</h2>
             <p class="game-description">Поймай 50 мишеней за 20 секунд.</p>
             <div class="game-area" id="bossArea"></div>
             <div class="game-stats">
                 <span>Время: <span id="bossTimer">20</span>s</span>
                 <span>Попаданий: <span id="bossHits">0</span>/28</span>
             </div>
+        </div>
+
+        <div class="game-container" id="game9" style="display:none;">
+            <h2 class="game-title">Игра 9: Логика 5x5</h2>
+            <p class="game-description">Найди одинаковые карточки. 15 секунд на запоминание, 10 жизней, ошибка = -1 жизнь.</p>
+            <div class="game-stats">
+                <span>Запомнить: <span id="game9PreviewTimer">15</span>s</span>
+                <span>Жизни: <span id="game9Lives">10</span></span>
+                <span>Пары: <span id="game9Pairs">0</span>/12</span>
+            </div>
+            <div class="logic-grid" id="game9Grid"></div>
+            <div id="game9Info" class="game-result"></div>
+        </div>
+
+        <div class="game-container" id="game10" style="display:none;">
+            <h2 class="game-title">Игра 10: Knife Hit</h2>
+            <p class="game-description">Бросай ножи в вращающееся колесо и не попадай в уже воткнутые ножи.</p>
+            <div class="knife-board" id="knifeBoard">
+                <div class="knife-wheel" id="knifeWheel">
+                    <div class="knife-core"></div>
+                    <div class="knife-sticks" id="knifeSticks"></div>
+                </div>
+            </div>
+            <div class="game-stats">
+                <span>Ножей осталось: <span id="game10KnivesLeft">12</span></span>
+                <span>Жизни: <span id="game10Lives">3</span></span>
+            </div>
+            <div style="text-align:center; margin-top: 14px;">
+                <button class="btn btn-small" onclick="throwKnifeGame10()">Бросить нож</button>
+            </div>
+            <div id="game10Info" class="game-result"></div>
         </div>
 
         <div class="market-container" id="marketContainer" style="display:none;">

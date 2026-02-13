@@ -14,10 +14,12 @@ const gameState = {
     game5: {},
     game6: {},
     game7: {},
-    game8: {}
+    game8: {},
+    game9: {},
+    game10: {}
 };
 
-const gameIds = ['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8'];
+const gameIds = ['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9', 'game10'];
 
 function hideAllScreens() {
     document.getElementById('mainContent').style.display = 'none';
@@ -754,17 +756,372 @@ function startGame8() {
             clearIntervals([spawn, tick]);
             const passed = hits >= target;
             if (passed) {
-                reward(280, 'Финальная игра пройдена!');
-                nextGame(showMarket, 900);
+                reward(280, 'Игра 8 пройдена!');
+                nextGame(startGame9, 900);
             } else {
                 showPopupAndRun(
-                    'Финальная игра не пройдена идеально. Повторяем уровень.',
+                    'Игра 8 не пройдена идеально. Повторяем уровень.',
                     'warn',
                     () => nextGame(startGame8, 0)
                 );
             }
         }
     }, 1000);
+}
+
+// ===== Shared Helpers =====
+function shuffleArray(list) {
+    const arr = list.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function normalizeAngle(angle) {
+    let value = angle % 360;
+    if (value < 0) value += 360;
+    return value;
+}
+
+function angularDistance(a, b) {
+    const diff = Math.abs(normalizeAngle(a) - normalizeAngle(b));
+    return Math.min(diff, 360 - diff);
+}
+
+// ===== Game 9 =====
+const game9PairSymbols = ['🍓', '🍇', '🍋', '🍒', '🍍', '🥝', '🌸', '⭐', '🎀', '💍', '🎵', '💡'];
+const game9BonusCard = '🎁';
+const game9PairTarget = 12;
+const game9PreviewDuration = 15;
+const game9StartLives = 10;
+
+function startGame9() {
+    const prev = gameState.game9;
+    if (prev && prev.previewTick) clearInterval(prev.previewTick);
+    if (prev && prev.flipBackTimeout) clearTimeout(prev.flipBackTimeout);
+
+    hideAllScreens();
+    document.getElementById('game9').style.display = 'block';
+
+    const cards = [];
+    game9PairSymbols.forEach((symbol) => {
+        cards.push({ symbol, matched: false, revealed: true, bonus: false });
+        cards.push({ symbol, matched: false, revealed: true, bonus: false });
+    });
+    cards.push({ symbol: game9BonusCard, matched: false, revealed: true, bonus: true });
+
+    gameState.game9 = {
+        cards: shuffleArray(cards),
+        previewLeft: game9PreviewDuration,
+        lives: game9StartLives,
+        pairs: 0,
+        firstPick: -1,
+        locked: true,
+        ended: false,
+        previewTick: null,
+        flipBackTimeout: null
+    };
+
+    updateGame9Stats();
+    renderGame9Grid();
+    const info = document.getElementById('game9Info');
+    if (info) info.textContent = 'Запоминай раскладку: 15 секунд';
+
+    const previewEl = document.getElementById('game9PreviewTimer');
+    const state = gameState.game9;
+    state.previewTick = setInterval(() => {
+        const current = gameState.game9;
+        if (!current || current.ended) return;
+
+        current.previewLeft -= 1;
+        if (previewEl) previewEl.textContent = String(Math.max(0, current.previewLeft));
+
+        if (current.previewLeft <= 0) {
+            clearInterval(current.previewTick);
+            current.previewTick = null;
+            current.locked = false;
+            current.cards.forEach((card) => {
+                if (!card.matched) card.revealed = false;
+            });
+            renderGame9Grid();
+            if (info) info.textContent = 'Открывай пары. Бонусная карта открывается сама.';
+        }
+    }, 1000);
+}
+
+function updateGame9Stats() {
+    const state = gameState.game9;
+    if (!state) return;
+
+    const previewEl = document.getElementById('game9PreviewTimer');
+    const livesEl = document.getElementById('game9Lives');
+    const pairsEl = document.getElementById('game9Pairs');
+
+    if (previewEl) previewEl.textContent = String(Math.max(0, state.previewLeft));
+    if (livesEl) livesEl.textContent = String(state.lives);
+    if (pairsEl) pairsEl.textContent = String(state.pairs);
+}
+
+function renderGame9Grid() {
+    const state = gameState.game9;
+    const grid = document.getElementById('game9Grid');
+    if (!state || !grid) return;
+
+    grid.innerHTML = '';
+    state.cards.forEach((card, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'logic-card';
+
+        const opened = card.revealed || card.matched;
+        if (opened) btn.classList.add('is-open');
+        if (card.matched) btn.classList.add('is-matched');
+        if (card.bonus) btn.classList.add('is-bonus');
+
+        btn.textContent = opened ? card.symbol : '?';
+        btn.disabled = state.locked || card.matched;
+        btn.onclick = () => pickGame9Card(index);
+        grid.appendChild(btn);
+    });
+}
+
+function pickGame9Card(index) {
+    const state = gameState.game9;
+    const info = document.getElementById('game9Info');
+    if (!state || state.ended || state.locked) return;
+
+    const card = state.cards[index];
+    if (!card || card.matched || card.revealed) return;
+
+    card.revealed = true;
+    renderGame9Grid();
+
+    if (card.bonus) {
+        card.matched = true;
+        renderGame9Grid();
+        if (info) info.textContent = 'Бонусная карта открыта';
+        return;
+    }
+
+    if (state.firstPick < 0) {
+        state.firstPick = index;
+        if (info) info.textContent = 'Выбери вторую карту';
+        return;
+    }
+
+    const firstIndex = state.firstPick;
+    const firstCard = state.cards[firstIndex];
+    state.firstPick = -1;
+
+    if (firstCard.symbol === card.symbol) {
+        firstCard.matched = true;
+        card.matched = true;
+        state.pairs += 1;
+        updateGame9Stats();
+        renderGame9Grid();
+        if (info) info.textContent = `Пара найдена: ${state.pairs}/${game9PairTarget}`;
+
+        if (state.pairs >= game9PairTarget) {
+            state.ended = true;
+            if (state.previewTick) clearInterval(state.previewTick);
+            reward(320, 'Игра 9 пройдена!');
+            nextGame(startGame10, 900);
+        }
+        return;
+    }
+
+    state.lives -= 1;
+    updateGame9Stats();
+
+    if (state.lives <= 0) {
+        state.ended = true;
+        state.locked = true;
+        renderGame9Grid();
+        showPopupAndRun(
+            'Игра 9 проиграна. Запускаем заново с новой раскладкой.',
+            'warn',
+            () => nextGame(startGame9, 0)
+        );
+        return;
+    }
+
+    state.locked = true;
+    const secondIndex = index;
+    if (info) info.textContent = `Не совпало. Жизней осталось: ${state.lives}`;
+    state.flipBackTimeout = setTimeout(() => {
+        const current = gameState.game9;
+        if (!current || current.ended) return;
+        current.cards[firstIndex].revealed = false;
+        current.cards[secondIndex].revealed = false;
+        current.locked = false;
+        renderGame9Grid();
+    }, 520);
+}
+
+// ===== Game 10 =====
+const game10TargetKnives = 12;
+const game10StartLives = 3;
+const game10CollisionAngle = 16;
+
+function generateGame10Sticks(count, minGap = 34) {
+    const result = [];
+    let attempts = 0;
+    while (result.length < count && attempts < 400) {
+        const candidate = Math.random() * 360;
+        if (result.every((angle) => angularDistance(angle, candidate) >= minGap)) {
+            result.push(candidate);
+        }
+        attempts += 1;
+    }
+    return result;
+}
+
+function startGame10() {
+    const prev = gameState.game10;
+    if (prev && prev.rafId) cancelAnimationFrame(prev.rafId);
+    if (prev && prev.failTimeout) clearTimeout(prev.failTimeout);
+
+    hideAllScreens();
+    document.getElementById('game10').style.display = 'block';
+
+    gameState.game10 = {
+        wheelAngle: Math.random() * 360,
+        speed: (1.7 + Math.random() * 1.0) * (Math.random() > 0.5 ? 1 : -1),
+        knivesLeft: game10TargetKnives,
+        lives: game10StartLives,
+        stuckAngles: generateGame10Sticks(3),
+        ended: false,
+        lockThrow: false,
+        rafId: null,
+        lastTs: 0,
+        failTimeout: null
+    };
+
+    updateGame10Stats();
+    renderGame10Sticks();
+    updateGame10WheelRotation();
+    const info = document.getElementById('game10Info');
+    if (info) info.textContent = 'Поймай ритм колеса и бросай';
+    runGame10Loop();
+}
+
+function updateGame10Stats() {
+    const state = gameState.game10;
+    if (!state) return;
+    const knivesEl = document.getElementById('game10KnivesLeft');
+    const livesEl = document.getElementById('game10Lives');
+    if (knivesEl) knivesEl.textContent = String(state.knivesLeft);
+    if (livesEl) livesEl.textContent = String(state.lives);
+}
+
+function updateGame10WheelRotation() {
+    const state = gameState.game10;
+    const wheel = document.getElementById('knifeWheel');
+    if (!state || !wheel) return;
+    wheel.style.transform = `rotate(${state.wheelAngle}deg)`;
+}
+
+function renderGame10Sticks() {
+    const state = gameState.game10;
+    const sticks = document.getElementById('knifeSticks');
+    if (!state || !sticks) return;
+
+    sticks.innerHTML = '';
+    const radius = 94;
+    state.stuckAngles.forEach((angle) => {
+        const knife = document.createElement('span');
+        knife.className = 'wheel-knife';
+        const rad = (angle * Math.PI) / 180;
+        const x = Math.cos(rad) * radius;
+        const y = Math.sin(rad) * radius;
+        knife.style.left = `calc(50% + ${x}px)`;
+        knife.style.top = `calc(50% + ${y}px)`;
+        knife.style.transform = `translate(-50%, -50%) rotate(${angle + 90}deg)`;
+        sticks.appendChild(knife);
+    });
+}
+
+function runGame10Loop() {
+    const tick = (ts) => {
+        const state = gameState.game10;
+        if (!state || state.ended) return;
+
+        if (!state.lastTs) state.lastTs = ts;
+        const dt = Math.min(36, ts - state.lastTs);
+        state.lastTs = ts;
+        state.wheelAngle = normalizeAngle(state.wheelAngle + state.speed * (dt / 16.666));
+        updateGame10WheelRotation();
+
+        state.rafId = requestAnimationFrame(tick);
+    };
+
+    const state = gameState.game10;
+    if (!state || state.ended) return;
+    state.rafId = requestAnimationFrame(tick);
+}
+
+function throwKnifeGame10() {
+    const state = gameState.game10;
+    const info = document.getElementById('game10Info');
+    const board = document.getElementById('knifeBoard');
+    if (!state || state.ended || state.lockThrow) return;
+
+    state.lockThrow = true;
+    const impactAngle = normalizeAngle(90 - state.wheelAngle);
+    const collision = state.stuckAngles.some((angle) => angularDistance(angle, impactAngle) < game10CollisionAngle);
+
+    if (collision) {
+        state.lives -= 1;
+        updateGame10Stats();
+        if (info) info.textContent = 'Столкновение с ножом';
+
+        if (board) {
+            board.classList.add('knife-board-fail');
+            if (state.failTimeout) clearTimeout(state.failTimeout);
+            state.failTimeout = setTimeout(() => {
+                const currentBoard = document.getElementById('knifeBoard');
+                if (currentBoard) currentBoard.classList.remove('knife-board-fail');
+            }, 210);
+        }
+
+        if (state.lives <= 0) {
+            state.ended = true;
+            if (state.rafId) cancelAnimationFrame(state.rafId);
+            showPopupAndRun(
+                'Игра 10 проиграна. Перезапускаем уровень.',
+                'warn',
+                () => nextGame(startGame10, 0)
+            );
+            return;
+        }
+
+        setTimeout(() => {
+            const current = gameState.game10;
+            if (current && !current.ended) current.lockThrow = false;
+        }, 280);
+        return;
+    }
+
+    state.stuckAngles.push(impactAngle);
+    state.knivesLeft -= 1;
+    renderGame10Sticks();
+    updateGame10Stats();
+    if (info) info.textContent = 'Попадание';
+
+    if (state.knivesLeft <= 0) {
+        state.ended = true;
+        if (state.rafId) cancelAnimationFrame(state.rafId);
+        reward(360, 'Игра 10 пройдена!');
+        nextGame(showMarket, 900);
+        return;
+    }
+
+    setTimeout(() => {
+        const current = gameState.game10;
+        if (current && !current.ended) current.lockThrow = false;
+    }, 120);
 }
 
 // ===== Puzzle Market =====

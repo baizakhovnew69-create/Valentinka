@@ -625,156 +625,146 @@ function finishGame4(forceWin = false, showPhoto = false) {
 
 // ===== Game 5 =====
 const game5Config = {
-    duration: 45,
-    targetHits: 20,
-    maxMisses: 5,
-    zoneMin: 43,
-    zoneMax: 57
+    maxMistakes: 5,
+    rounds: [
+        ['Медина', 'я', 'тебя', 'люблю'],
+        ['Ты', 'мой', 'самый', 'светлый', 'день'],
+        ['С', 'тобой', 'все', 'становится', 'теплее'],
+        ['Жаным', 'ты', 'моя', 'радость']
+    ],
+    decoyWords: ['нежность', 'улыбка', 'счастье', 'весна', 'мечта', 'поцелуй', 'звезды']
 };
 
 function startGame5() {
-    const prev = gameState.game5;
-    if (prev && prev.tick) clearInterval(prev.tick);
-    if (prev && prev.rafId) cancelAnimationFrame(prev.rafId);
-
     hideAllScreens();
     document.getElementById('game5').style.display = 'block';
 
     gameState.game5 = {
-        timeLeft: game5Config.duration,
-        hits: 0,
-        misses: 0,
-        markerPercent: 50,
-        motion: Math.random() * Math.PI * 2,
-        speed: 3.2 + Math.random() * 0.8,
-        lockUntil: 0,
+        round: 0,
+        mistakes: 0,
+        progress: [],
+        locked: false,
         ended: false,
-        tick: null,
-        rafId: null,
-        lastTs: 0,
         cleanup: () => {
             const current = gameState.game5;
             if (!current) return;
             current.ended = true;
-            clearIntervals([current.tick]);
-            if (current.rafId) cancelAnimationFrame(current.rafId);
+            current.locked = true;
         }
     };
 
-    updateGame5RhythmStats();
-    const info = document.getElementById('rhythmInfo');
-    if (info) info.textContent = 'Нажимай, когда маркер попадает в золотую зону';
-
-    renderGame5RhythmMarker();
-    runGame5RhythmLoop();
-
-    gameState.game5.tick = setInterval(() => {
-        const state = gameState.game5;
-        if (!state || state.ended) return;
-
-        state.timeLeft -= 1;
-        updateGame5RhythmStats();
-        if (state.timeLeft <= 0) {
-            finishGame5Rhythm(false);
-        }
-    }, 1000);
+    updateGame5PhraseStats();
+    renderGame5PhraseRound();
 }
 
-function updateGame5RhythmStats() {
+function updateGame5PhraseStats() {
     const state = gameState.game5;
     if (!state) return;
 
-    const timerEl = document.getElementById('rhythmTimer');
-    const hitsEl = document.getElementById('rhythmHits');
-    const missesEl = document.getElementById('rhythmMisses');
-    if (timerEl) timerEl.textContent = String(Math.max(0, state.timeLeft));
-    if (hitsEl) hitsEl.textContent = String(state.hits);
-    if (missesEl) missesEl.textContent = String(state.misses);
+    const levelEl = document.getElementById('game5Level');
+    const mistakesEl = document.getElementById('game5Mistakes');
+    if (levelEl) levelEl.textContent = String(Math.min(game5Config.rounds.length, state.round + 1));
+    if (mistakesEl) mistakesEl.textContent = String(state.mistakes);
 }
 
-function renderGame5RhythmMarker() {
+function updateGame5PhraseTarget() {
     const state = gameState.game5;
-    const marker = document.getElementById('rhythmMarker');
-    if (!state || !marker) return;
-    marker.style.left = `${state.markerPercent}%`;
+    const targetEl = document.getElementById('game5Target');
+    if (!state || !targetEl) return;
+
+    const built = state.progress.join(' ');
+    targetEl.textContent = built ? `Собрано: ${built}` : 'Собрано: ...';
 }
 
-function runGame5RhythmLoop() {
-    const tick = (ts) => {
-        const state = gameState.game5;
-        if (!state || state.ended) return;
-
-        if (!state.lastTs) state.lastTs = ts;
-        const dt = Math.min(36, ts - state.lastTs);
-        state.lastTs = ts;
-
-        state.motion += state.speed * (dt / 1000);
-        state.markerPercent = 50 + Math.sin(state.motion) * 46;
-
-        // Mild speed drift so rhythm is alive, but still readable.
-        state.speed += Math.sin(ts / 1400) * 0.0006;
-        state.speed = Math.max(2.7, Math.min(4.7, state.speed));
-
-        renderGame5RhythmMarker();
-        state.rafId = requestAnimationFrame(tick);
-    };
-
-    const state = gameState.game5;
-    if (!state || state.ended) return;
-    state.rafId = requestAnimationFrame(tick);
+function getGame5RoundWords(phrase) {
+    const words = phrase.slice();
+    const decoyPool = game5Config.decoyWords.filter((word) => !words.includes(word));
+    const decoy = decoyPool[Math.floor(Math.random() * decoyPool.length)];
+    words.push(decoy);
+    return shuffleArray(words);
 }
 
-function catchRhythmBeat() {
+function renderGame5PhraseRound() {
     const state = gameState.game5;
-    const info = document.getElementById('rhythmInfo');
-    const track = document.getElementById('rhythmTrack');
-    if (!state || state.ended) return;
+    const board = document.getElementById('game5WordBoard');
+    const info = document.getElementById('game5Info');
+    if (!state || state.ended || !board) return;
 
-    const now = performance.now();
-    if (now < state.lockUntil) return;
-    state.lockUntil = now + 170;
+    const phrase = game5Config.rounds[state.round];
+    state.progress = [];
+    state.locked = false;
 
-    const hit = state.markerPercent >= game5Config.zoneMin && state.markerPercent <= game5Config.zoneMax;
-    if (hit) {
-        state.hits += 1;
-        if (info) info.textContent = `Точно! ${state.hits}/${game5Config.targetHits}`;
-        if (track) {
-            track.classList.add('rhythm-hit');
-            setTimeout(() => track.classList.remove('rhythm-hit'), 140);
+    board.innerHTML = '';
+    const wordPool = getGame5RoundWords(phrase);
+    wordPool.forEach((word) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'word-chip';
+        chip.textContent = word;
+        chip.onclick = () => handleGame5WordClick(word, chip);
+        board.appendChild(chip);
+    });
+
+    updateGame5PhraseTarget();
+    updateGame5PhraseStats();
+    if (info) {
+        info.textContent = `Уровень ${state.round + 1}: собери фразу по порядку`;
+    }
+}
+
+function handleGame5WordClick(word, chipEl) {
+    const state = gameState.game5;
+    const info = document.getElementById('game5Info');
+    if (!state || state.ended || state.locked) return;
+
+    const phrase = game5Config.rounds[state.round];
+    const expectedWord = phrase[state.progress.length];
+    if (word === expectedWord) {
+        state.progress.push(word);
+        if (chipEl) {
+            chipEl.disabled = true;
+            chipEl.classList.add('correct');
         }
-        updateGame5RhythmStats();
-        if (state.hits >= game5Config.targetHits) {
-            finishGame5Rhythm(true);
+        updateGame5PhraseTarget();
+
+        if (state.progress.length >= phrase.length) {
+            state.round += 1;
+            if (state.round >= game5Config.rounds.length) {
+                state.ended = true;
+                completeGame(5, 260, 'Игра 5');
+                return;
+            }
+
+            state.locked = true;
+            if (info) info.textContent = 'Отлично! Следующая фраза...';
+            updateGame5PhraseStats();
+
+            setTimeout(() => {
+                const current = gameState.game5;
+                if (!current || current.ended) return;
+                renderGame5PhraseRound();
+            }, 550);
+            return;
         }
+
+        if (info) info.textContent = 'Верно, продолжай!';
         return;
     }
 
-    state.misses += 1;
-    if (info) info.textContent = `Мимо. Осталось ошибок: ${Math.max(0, game5Config.maxMisses - state.misses)}`;
-    if (track) {
-        track.classList.add('rhythm-miss');
-        setTimeout(() => track.classList.remove('rhythm-miss'), 160);
+    state.mistakes += 1;
+    updateGame5PhraseStats();
+    if (chipEl) {
+        chipEl.disabled = true;
+        chipEl.classList.add('wrong');
     }
-    updateGame5RhythmStats();
-    if (state.misses >= game5Config.maxMisses) {
-        finishGame5Rhythm(false);
+    if (info) {
+        info.textContent = `Немного не то. Осталось ошибок: ${Math.max(0, game5Config.maxMistakes - state.mistakes)}`;
     }
-}
 
-function finishGame5Rhythm(forceWin = false) {
-    const state = gameState.game5;
-    if (!state || state.ended) return;
-    state.ended = true;
-
-    clearIntervals([state.tick]);
-    if (state.rafId) cancelAnimationFrame(state.rafId);
-
-    const passed = forceWin || state.hits >= game5Config.targetHits;
-    if (passed) {
-        completeGame(5, 260, 'Игра 5');
-    } else {
+    if (state.mistakes >= game5Config.maxMistakes) {
+        state.ended = true;
         showPopupAndRun(
-            'Игра 5 не пройдена. Поймай 20 попаданий и держи ритм.',
+            'Игра 5 не пройдена. Слишком много ошибок, переигрываем уровень.',
             'warn',
             () => nextGame(startGame5, 0)
         );

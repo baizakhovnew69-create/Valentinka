@@ -104,7 +104,7 @@
                     </span>
                     <span class="game-card-meta">
                         <span class="game-card-num">Игра 5</span>
-                        <span class="game-card-title">Ритм сердца</span>
+                        <span class="game-card-title">Собери фразу</span>
                     </span>
                 </button>
 
@@ -242,21 +242,17 @@
         </div>
 
         <div class="game-container" id="game5" style="display:none;">
-            <h2 class="game-title">Игра 5: Ритм сердца</h2>
-            <p class="game-description">Лови ритм: жми в момент, когда маркер в золотой зоне.</p>
-            <div class="rhythm-panel">
-                <div class="rhythm-track" id="rhythmTrack">
-                    <div class="rhythm-zone" id="rhythmZone"></div>
-                    <div class="rhythm-marker" id="rhythmMarker"></div>
-                </div>
-                <button class="btn btn-small" onclick="catchRhythmBeat()">Поймать ритм</button>
+            <h2 class="game-title">Игра 5: Собери фразу</h2>
+            <p class="game-description">Нажимай слова в правильном порядке. Допустимо до 5 ошибок.</p>
+            <div class="word-game-panel">
+                <div class="word-game-target" id="game5Target">Собрано: ...</div>
+                <div class="word-game-board" id="game5WordBoard"></div>
             </div>
             <div class="game-stats">
-                <span>Время: <span id="rhythmTimer">45</span>s</span>
-                <span>Попаданий: <span id="rhythmHits">0</span>/20</span>
-                <span>Промахов: <span id="rhythmMisses">0</span>/5</span>
+                <span>Уровень: <span id="game5Level">1</span>/4</span>
+                <span>Ошибок: <span id="game5Mistakes">0</span>/5</span>
             </div>
-            <div id="rhythmInfo" class="game-result"></div>
+            <div id="game5Info" class="game-result"></div>
         </div>
 
         <div class="game-container" id="game6" style="display:none;">

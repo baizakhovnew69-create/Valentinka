@@ -1705,8 +1705,8 @@ body {
 }
 
 body {
-    align-items: flex-start;
-    padding: 32px 20px 40px;
+    align-items: center;
+    padding: 20px 20px 24px;
     overflow-y: auto;
     font-family: "Manrope", "Segoe UI", sans-serif;
     color: var(--ed-ink);
@@ -1745,16 +1745,15 @@ body::after {
 
 .container {
     width: min(980px, 100%);
-    min-height: auto;
-    padding: 30px 14px 20px;
+    min-height: calc(100vh - 48px);
+    padding: 16px 14px;
 }
 
 .score-board {
-    position: sticky;
-    top: 8px;
-    right: auto;
-    margin-left: auto;
-    margin-right: 8px;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    margin: 0;
     background: var(--ed-paper-soft);
     border: 1px solid var(--ed-line);
     border-radius: 999px;
@@ -2017,12 +2016,13 @@ body::after {
 
 @media (max-width: 768px) {
     body {
-        padding: 18px 10px 22px;
+        padding: 12px 10px 16px;
     }
 
     .container {
-        padding: 12px 8px 14px;
-        align-items: flex-start;
+        min-height: calc(100vh - 28px);
+        padding: 10px 8px;
+        align-items: center;
     }
 
     .score-board {

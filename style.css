@@ -2035,6 +2035,46 @@ body::after {
     border-color: rgba(195, 146, 47, 0.42);
 }
 
+#mainContent {
+    width: min(900px, 96vw);
+    align-self: flex-end;
+    margin-bottom: clamp(16px, 4vh, 44px);
+    padding: 0 14px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    overflow: visible;
+}
+
+#mainContent::before {
+    display: none;
+}
+
+#mainContent .title {
+    color: #fff;
+    margin-bottom: 14px;
+    text-shadow: 0 8px 24px rgba(0, 0, 0, 0.58);
+}
+
+#mainContent .title::after {
+    display: none;
+}
+
+#mainContent .subtitle {
+    max-width: min(760px, 96vw);
+    margin: 0 auto 18px;
+    color: rgba(255, 255, 255, 0.96);
+    text-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+#mainContent #introResponse {
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
 .floating-heart {
     opacity: 0.5;
     filter: grayscale(0.15);
@@ -2071,6 +2111,20 @@ body::after {
     .game-container,
     .market-container {
         padding: 24px 16px;
+    }
+
+    #mainContent {
+        width: 100%;
+        margin-bottom: 14px;
+        padding: 0 8px;
+    }
+
+    #mainContent .title {
+        font-size: clamp(1.9rem, 8vw, 2.8rem);
+    }
+
+    #mainContent .subtitle {
+        margin-bottom: 16px;
     }
 
     .title {

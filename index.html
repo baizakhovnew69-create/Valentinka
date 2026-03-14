@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="main-screen-active">
     <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true">
         <source src="Backgroudvideo.mp4" type="video/mp4">
     </video>
@@ -353,10 +353,15 @@
         (function () {
             const video = document.getElementById('backgroundVideo');
             if (!(video instanceof HTMLVideoElement)) return;
+            const mainContent = document.getElementById('mainContent');
 
             let audioUnlocked = false;
             let unlockInProgress = false;
             let keepAliveTimer = null;
+            const isMainScreenActive = () => {
+                if (!mainContent) return document.body.classList.contains('main-screen-active');
+                return getComputedStyle(mainContent).display !== 'none';
+            };
 
             video.defaultMuted = true;
             video.muted = true;
@@ -364,7 +369,7 @@
             video.playsInline = true;
 
             const safePlay = () => {
-                if (document.visibilityState !== 'visible') return;
+                if (document.visibilityState !== 'visible' || !isMainScreenActive()) return;
                 const playPromise = video.play();
                 if (playPromise && typeof playPromise.catch === 'function') {
                     playPromise.catch(() => {});
@@ -374,7 +379,7 @@
             const ensurePlayingSoon = (delay = 0) => {
                 if (keepAliveTimer) clearTimeout(keepAliveTimer);
                 keepAliveTimer = setTimeout(() => {
-                    if (document.visibilityState === 'visible' && video.paused) {
+                    if (document.visibilityState === 'visible' && isMainScreenActive() && video.paused) {
                         safePlay();
                     }
                 }, delay);
@@ -388,7 +393,7 @@
             };
 
             const enableAudio = () => {
-                if (audioUnlocked || unlockInProgress) return;
+                if (!isMainScreenActive() || audioUnlocked || unlockInProgress) return;
                 unlockInProgress = true;
                 video.defaultMuted = false;
                 video.muted = false;
@@ -415,9 +420,20 @@
             };
 
             const keepAlive = () => {
-                if (document.visibilityState === 'visible' && video.paused) {
+                if (document.visibilityState === 'visible' && isMainScreenActive() && video.paused) {
                     safePlay();
                 }
+            };
+
+            const syncWithScreenState = () => {
+                const active = isMainScreenActive();
+                document.body.classList.toggle('main-screen-active', active);
+                if (active) {
+                    safePlay();
+                    ensurePlayingSoon(40);
+                    return;
+                }
+                if (!video.paused) video.pause();
             };
 
             document.addEventListener('pointerdown', enableAudio, { capture: true, passive: true });
@@ -432,9 +448,12 @@
             document.addEventListener('visibilitychange', keepAlive);
             window.addEventListener('pageshow', keepAlive);
             window.addEventListener('focus', keepAlive);
+            if (mainContent) {
+                const mainObserver = new MutationObserver(syncWithScreenState);
+                mainObserver.observe(mainContent, { attributes: true, attributeFilter: ['style', 'class'] });
+            }
 
-            safePlay();
-            ensurePlayingSoon(80);
+            syncWithScreenState();
         })();
     </script>
 </body>

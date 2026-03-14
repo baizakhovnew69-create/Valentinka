@@ -1736,6 +1736,14 @@ body {
     object-position: center;
     pointer-events: none;
     z-index: -6;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.32s ease, visibility 0.32s ease;
+}
+
+body.main-screen-active .video-background {
+    opacity: 1;
+    visibility: visible;
 }
 
 body::before {

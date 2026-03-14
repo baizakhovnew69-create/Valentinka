@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true">
         <source src="Backgroudvideo.mp4" type="video/mp4">
     </video>
     <div class="animated-background"></div>
@@ -354,19 +354,41 @@
             const video = document.getElementById('backgroundVideo');
             if (!video) return;
 
-            video.volume = 0.45;
+            let audioUnlocked = false;
+            video.defaultMuted = true;
+            video.muted = true;
+            video.volume = 1;
 
-            const enableAudio = () => {
-                video.muted = false;
+            const safePlay = () => {
                 const playPromise = video.play();
                 if (playPromise && typeof playPromise.catch === 'function') {
-                    playPromise.catch(() => {
-                        video.muted = true;
-                    });
+                    playPromise.catch(() => {});
                 }
             };
 
-            document.addEventListener('pointerdown', enableAudio, { once: true, capture: true });
+            const resumeIfNeeded = () => {
+                if (document.visibilityState === 'visible' && video.paused) {
+                    safePlay();
+                }
+            };
+
+            video.addEventListener('pause', resumeIfNeeded);
+            document.addEventListener('visibilitychange', resumeIfNeeded);
+            window.addEventListener('pageshow', resumeIfNeeded);
+            safePlay();
+
+            const enableAudio = () => {
+                if (audioUnlocked) return;
+                audioUnlocked = true;
+                video.defaultMuted = false;
+                video.muted = false;
+                video.volume = 1;
+                safePlay();
+                setTimeout(resumeIfNeeded, 80);
+            };
+
+            document.addEventListener('touchstart', enableAudio, { once: true, capture: true });
+            document.addEventListener('click', enableAudio, { once: true, capture: true });
             document.addEventListener('keydown', enableAudio, { once: true, capture: true });
         })();
     </script>

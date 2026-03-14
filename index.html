@@ -352,44 +352,89 @@
     <script>
         (function () {
             const video = document.getElementById('backgroundVideo');
-            if (!video) return;
+            if (!(video instanceof HTMLVideoElement)) return;
 
             let audioUnlocked = false;
+            let unlockInProgress = false;
+            let keepAliveTimer = null;
+
             video.defaultMuted = true;
             video.muted = true;
             video.volume = 1;
+            video.playsInline = true;
 
             const safePlay = () => {
+                if (document.visibilityState !== 'visible') return;
                 const playPromise = video.play();
                 if (playPromise && typeof playPromise.catch === 'function') {
                     playPromise.catch(() => {});
                 }
             };
 
-            const resumeIfNeeded = () => {
+            const ensurePlayingSoon = (delay = 0) => {
+                if (keepAliveTimer) clearTimeout(keepAliveTimer);
+                keepAliveTimer = setTimeout(() => {
+                    if (document.visibilityState === 'visible' && video.paused) {
+                        safePlay();
+                    }
+                }, delay);
+            };
+
+            const removeUnlockListeners = () => {
+                document.removeEventListener('pointerdown', enableAudio, true);
+                document.removeEventListener('touchstart', enableAudio, true);
+                document.removeEventListener('click', enableAudio, true);
+                document.removeEventListener('keydown', enableAudio, true);
+            };
+
+            const enableAudio = () => {
+                if (audioUnlocked || unlockInProgress) return;
+                unlockInProgress = true;
+                video.defaultMuted = false;
+                video.muted = false;
+                video.volume = 1;
+
+                const playPromise = video.play();
+                if (!playPromise || typeof playPromise.then !== 'function') {
+                    audioUnlocked = true;
+                    unlockInProgress = false;
+                    removeUnlockListeners();
+                    return;
+                }
+
+                playPromise.then(() => {
+                    audioUnlocked = true;
+                    unlockInProgress = false;
+                    removeUnlockListeners();
+                }).catch(() => {
+                    unlockInProgress = false;
+                    video.defaultMuted = true;
+                    video.muted = true;
+                    ensurePlayingSoon(40);
+                });
+            };
+
+            const keepAlive = () => {
                 if (document.visibilityState === 'visible' && video.paused) {
                     safePlay();
                 }
             };
 
-            video.addEventListener('pause', resumeIfNeeded);
-            document.addEventListener('visibilitychange', resumeIfNeeded);
-            window.addEventListener('pageshow', resumeIfNeeded);
+            document.addEventListener('pointerdown', enableAudio, { capture: true, passive: true });
+            document.addEventListener('touchstart', enableAudio, { capture: true, passive: true });
+            document.addEventListener('click', enableAudio, { capture: true, passive: true });
+            document.addEventListener('keydown', enableAudio, true);
+
+            video.addEventListener('stalled', () => ensurePlayingSoon(120));
+            video.addEventListener('waiting', () => ensurePlayingSoon(120));
+            video.addEventListener('suspend', () => ensurePlayingSoon(160));
+            video.addEventListener('ended', () => ensurePlayingSoon(0));
+            document.addEventListener('visibilitychange', keepAlive);
+            window.addEventListener('pageshow', keepAlive);
+            window.addEventListener('focus', keepAlive);
+
             safePlay();
-
-            const enableAudio = () => {
-                if (audioUnlocked) return;
-                audioUnlocked = true;
-                video.defaultMuted = false;
-                video.muted = false;
-                video.volume = 1;
-                safePlay();
-                setTimeout(resumeIfNeeded, 80);
-            };
-
-            document.addEventListener('touchstart', enableAudio, { once: true, capture: true });
-            document.addEventListener('click', enableAudio, { once: true, capture: true });
-            document.addEventListener('keydown', enableAudio, { once: true, capture: true });
+            ensurePlayingSoon(80);
         })();
     </script>
 </body>
